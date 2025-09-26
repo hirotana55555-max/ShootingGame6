@@ -1,10 +1,9 @@
-// game/core/entityFactory.js
+// game/core/entityFactory.js 【リファクタリング後】
 
 import { Position } from '../components/Position.js';
 import { Renderable } from '../components/Renderable.js';
 import { Velocity } from '../components/Velocity.js';
 import { Controllable } from '../components/Controllable.js';
-import { Physics } from '../components/Physics.js';
 
 /**
  * プレイヤーエンティティを作成して返す
@@ -22,7 +21,6 @@ export function createPlayer(world) {
   world.addComponent(player, new Renderable('white', 30, 30));
   world.addComponent(player, new Velocity(0, 0));
   world.addComponent(player, new Controllable());
-  world.addComponent(player, new Physics({ drag: 5 })); // ← 物理特
 
   console.log(`プレイヤーを作成しました (ID: ${player})`);
   return player;
