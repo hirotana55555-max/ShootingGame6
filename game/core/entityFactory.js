@@ -4,6 +4,7 @@ import { Position } from '../components/Position.js';
 import { Renderable } from '../components/Renderable.js';
 import { Velocity } from '../components/Velocity.js';
 import { Controllable } from '../components/Controllable.js';
+import { Rotation } from '../components/Rotation.js';
 
 /**
  * プレイヤーエンティティを作成して返す
@@ -21,6 +22,7 @@ export function createPlayer(world) {
   world.addComponent(player, new Renderable('white', 30, 30));
   world.addComponent(player, new Velocity(0, 0));
   world.addComponent(player, new Controllable());
+  world.addComponent(player, new Rotation());
 
   console.log(`プレイヤーを作成しました (ID: ${player})`);
   return player;

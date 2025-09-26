@@ -1,6 +1,6 @@
-// game/systems/RenderSystem.js
-import { Position } from '../components/Position.js'; // 一つ上がってcomponentsへ
-import { Renderable } from '../components/Renderable.js'; // 一つ上がってcomponentsへ
+// game/systems/RenderSystem.js 【改造後コード】
+
+import { Position, Renderable, Rotation } from '../components/index.js'; // ← ★Rotationをインポート
 
 export class RenderSystem {
   /**
@@ -8,24 +8,45 @@ export class RenderSystem {
    */
   constructor(world) {
     this.world = world;
-    this.query = [Position, Renderable]; // このシステムが興味を持つコンポーネント
+    // ★クエリにRotationを追加（ただし、必須ではないのでこの行は変更不要）
+    this.query = [Position, Renderable]; 
   }
 
   update() {
     const context = this.world.context;
-    const entities = this.world.getEntities(this.query); // ワールドから対象エンティティを取得
+    const entities = this.world.getEntities(this.query);
 
     for (const entityId of entities) {
       const position = this.world.getComponent(entityId, Position);
       const renderable = this.world.getComponent(entityId, Renderable);
+      
+      // ★★★ ここからが改造部分 ★★★
+      // Rotationコンポーネントを「あれば」取得する
+      const rotation = this.world.getComponent(entityId, Rotation);
 
+      // 1. 現在の描画状態を保存する
+      context.save(); 
+
+      // 2. 描画の原点をエンティティの中心に移動する
+      context.translate(position.x, position.y);
+      
+      // 3. もしRotationコンポーネントがあれば、その角度だけキャンバスを回転させる
+      if (rotation) {
+        context.rotate(rotation.angle);
+      }
+
+      // 4. 色を設定し、原点(0,0)を中心に四角形を描画する
       context.fillStyle = renderable.color;
       context.fillRect(
-        position.x - renderable.width / 2,
-        position.y - renderable.height / 2,
-        renderable.width,
+        -renderable.width / 2, 
+        -renderable.height / 2, 
+        renderable.width, 
         renderable.height
       );
+
+      // 5. 保存しておいた描画状態に戻す（これがないと次の描画がおかしくなる）
+      context.restore(); 
+      // ★★★ ここまでが改造部分 ★★★
     }
   }
 }

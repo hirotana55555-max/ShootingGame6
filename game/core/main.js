@@ -3,6 +3,7 @@ import { World } from './World.js';
 import { RenderSystem } from '../systems/RenderSystem.js';
 import { InputSystem } from '../systems/InputSystem.js';
 import { MovementSystem } from '../systems/MovementSystem.js';
+import { RotationSystem } from '../systems/RotationSystem.js';
 import { createPlayer } from './entityFactory.js';
 import { Controllable } from '../components/Controllable.js';
 
@@ -30,6 +31,7 @@ export function startGame(canvas) {
   // --- システムの追加 ---
   world.addSystem(new InputSystem(world)); 
   world.addSystem(new MovementSystem(world));
+  world.addSystem(new RotationSystem(world));
   world.addSystem(new RenderSystem(world));
 
   // --- エンティティの創造（専門家に依頼） ---
