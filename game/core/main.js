@@ -26,9 +26,13 @@ export function startGame(canvas) {
   world.context = context;
 
   // --- システムの追加 ---
-  world.addSystem(new InputSystem(world));
+  const inputSystem = new InputSystem(world); // 変数に保持
+  world.addSystem(inputSystem);
   world.addSystem(new MovementSystem(world));
   world.addSystem(new RenderSystem(world));
+
+  // --- ★重要：ここでリスナーを登録 ---
+  inputSystem.registerEventListeners();
 
   // --- エンティティの創造（専門家に依頼） ---
   createPlayer(world);
