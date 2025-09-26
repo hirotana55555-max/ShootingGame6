@@ -4,6 +4,11 @@ import { Position } from '../components/Position.js'; // 一つ上がってcompo
 import { Renderable } from '../components/Renderable.js'; // 一つ上がってcomponentsへ
 import { RenderSystem } from '../systems/RenderSystem.js'; // 一つ上がってsystemsへ
 
+import { Controllable } from '../components/Controllable.js';
+import { Velocity } from '../components/Velocity.js';
+import { InputSystem } from '../systems/InputSystem.js';
+import { MovementSystem } from '../systems/MovementSystem.js';
+
 
 
 let world;
@@ -25,13 +30,17 @@ export function startGame(canvas) {
   world.canvas = canvas; // Worldにcanvasとcontextを持たせておく
   world.context = context;
 
-  // システムをワールドに追加
+  // --- システムの追加 ---
+  world.addSystem(new InputSystem(world));
+  world.addSystem(new MovementSystem(world));
   world.addSystem(new RenderSystem(world));
 
-  // プレイヤーエンティティを創造
+  // --- プレイヤーエンティティの創造（改造） ---
   const player = world.createEntity();
   world.addComponent(player, new Position(canvas.width / 2, canvas.height - 50));
   world.addComponent(player, new Renderable('white', 30, 30));
+  world.addComponent(player, new Velocity(0, 0)); // ← 追加
+  world.addComponent(player, new Controllable());   // ← 追加
 
 
   function gameLoop(currentTime) {
