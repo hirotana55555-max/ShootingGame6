@@ -34,6 +34,49 @@ export class World {
       this.components.get(componentName).set(entityId, component);
     }
   
+
+  /**
+   * 指定したコンポーネントを持つエンティティのリストを取得する
+   * @param {Array<Function>} componentClasses
+   * @returns {Array<number>}
+   */
+  getEntities(componentClasses) {
+    const entities = [];
+    for (const entityId of this.entities) {
+      if (componentClasses.every(cls => this.hasComponent(entityId, cls))) {
+        entities.push(entityId);
+      }
+    }
+    return entities;
+  }
+
+  /**
+   * エンティティが指定のコンポーネントを持っているか確認する
+   * @param {number} entityId
+   * @param {Function} componentClass
+   * @returns {boolean}
+   */
+  hasComponent(entityId, componentClass) {
+    const componentName = componentClass.name;
+    return this.components.has(componentName) && this.components.get(componentName).has(entityId);
+  }
+
+  /**
+   * エンティティから指定のコンポーネントを取得する
+   * @param {number} entityId
+   * @param {Function} componentClass
+   * @returns {object | undefined}
+   */
+  getComponent(entityId, componentClass) {
+    const componentName = componentClass.name;
+    if (!this.hasComponent(entityId, componentClass)) {
+      return undefined;
+    }
+    return this.components.get(componentName).get(entityId);
+  }
+
+
+
     /**
      * システムをワールドに追加する
      * @param {System} system

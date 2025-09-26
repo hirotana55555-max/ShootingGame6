@@ -1,5 +1,10 @@
 // game/core/main.js
-import { World } from './World';
+import { World } from './World.js'; // 同じフォルダ
+import { Position } from '../components/Position.js'; // 一つ上がってcomponentsへ
+import { Renderable } from '../components/Renderable.js'; // 一つ上がってcomponentsへ
+import { RenderSystem } from '../systems/RenderSystem.js'; // 一つ上がってsystemsへ
+
+
 
 let world;
 let animationFrameId;
@@ -20,7 +25,13 @@ export function startGame(canvas) {
   world.canvas = canvas; // Worldにcanvasとcontextを持たせておく
   world.context = context;
 
-  // --- ここに将来、システムの追加やエンティティの作成が入る ---
+  // システムをワールドに追加
+  world.addSystem(new RenderSystem(world));
+
+  // プレイヤーエンティティを創造
+  const player = world.createEntity();
+  world.addComponent(player, new Position(canvas.width / 2, canvas.height - 50));
+  world.addComponent(player, new Renderable('white', 30, 30));
 
 
   function gameLoop(currentTime) {
