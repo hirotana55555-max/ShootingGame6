@@ -1,14 +1,9 @@
 // game/core/main.js
-import { World } from './World.js'; // 同じフォルダ
-import { Position } from '../components/Position.js'; // 一つ上がってcomponentsへ
-import { Renderable } from '../components/Renderable.js'; // 一つ上がってcomponentsへ
-import { RenderSystem } from '../systems/RenderSystem.js'; // 一つ上がってsystemsへ
-
-import { Controllable } from '../components/Controllable.js';
-import { Velocity } from '../components/Velocity.js';
+import { World } from './World.js';
+import { RenderSystem } from '../systems/RenderSystem.js';
 import { InputSystem } from '../systems/InputSystem.js';
 import { MovementSystem } from '../systems/MovementSystem.js';
-
+import { createPlayer } from './entityFactory.js';
 
 
 let world;
@@ -35,12 +30,8 @@ export function startGame(canvas) {
   world.addSystem(new MovementSystem(world));
   world.addSystem(new RenderSystem(world));
 
-  // --- プレイヤーエンティティの創造（改造） ---
-  const player = world.createEntity();
-  world.addComponent(player, new Position(canvas.width / 2, canvas.height - 50));
-  world.addComponent(player, new Renderable('white', 30, 30));
-  world.addComponent(player, new Velocity(0, 0)); // ← 追加
-  world.addComponent(player, new Controllable());   // ← 追加
+  // --- エンティティの創造（専門家に依頼） ---
+  createPlayer(world);
 
 
   function gameLoop(currentTime) {

@@ -4,7 +4,7 @@ import { Velocity } from '../components/Velocity.js';
 
 export class InputSystem {
   /**
-   * @param {import('../core/World').World} world
+   * @param {import('../core/World.js').World} world
    */
   constructor(world) {
     this.world = world;
@@ -17,7 +17,7 @@ export class InputSystem {
 
   update() {
     const entities = this.world.getEntities([Controllable, Velocity]);
-    const moveSpeed = 200; // プレイヤーの移動速度
+    const moveSpeed = 20; // プレイヤーの移動速度
 
     for (const entityId of entities) {
       const velocity = this.world.getComponent(entityId, Velocity);
