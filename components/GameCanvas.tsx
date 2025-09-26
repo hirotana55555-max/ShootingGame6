@@ -27,5 +27,5 @@ export default function GameCanvas() {
     };
   }, []); // 依存配列は空のまま
 
-  return <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid white' }} />;
+  return <canvas ref={canvasRef} width={360} height={580} style={{ border: '1px solid white' }} />;
 }
