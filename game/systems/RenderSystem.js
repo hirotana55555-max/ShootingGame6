@@ -35,6 +35,7 @@ export class RenderSystem {
         context.rotate(rotation.angle);
       }
 
+      /*
       // 4. 色を設定し、原点(0,0)を中心に四角形を描画する
       context.fillStyle = renderable.color;
       context.fillRect(
@@ -43,6 +44,27 @@ export class RenderSystem {
         renderable.width, 
         renderable.height
       );
+      */
+      // 4. 色を設定し、原点(0,0)を中心に形状を判定し描画する
+      context.fillStyle = renderable.color;
+
+      if (renderable.shape === 'triangle') {
+        // ▲ 縦長の三角形を描画
+        context.beginPath();
+        context.moveTo(0, -renderable.height / 2); // 頂点（上）
+        context.lineTo(-renderable.width / 2, renderable.height / 2); // 左下
+        context.lineTo(renderable.width / 2, renderable.height / 2); // 右下
+        context.closePath();
+        context.fill();
+      } else {
+        // ■ デフォルトは四角形
+        context.fillRect(
+          -renderable.width / 2, 
+          -renderable.height / 2, 
+          renderable.width, 
+          renderable.height
+        );
+      }
 
       // 5. 保存しておいた描画状態に戻す（これがないと次の描画がおかしくなる）
       context.restore(); 

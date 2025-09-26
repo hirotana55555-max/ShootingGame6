@@ -18,8 +18,9 @@ export function createPlayer(world) {
   }
 
   const player = world.createEntity();
-  world.addComponent(player, new Position(canvas.width / 2, canvas.height - 50));
-  world.addComponent(player, new Renderable('white', 30, 30));
+  world.addComponent(player, new Position(canvas.width / 2, canvas.height - 80));//縦長50→80
+  //world.addComponent(player, new Renderable('white', 30, 30));　//自機正方形から
+  world.addComponent(player, new Renderable('white', 20, 30, 'triangle'));//自機三角形に
   world.addComponent(player, new Velocity(0, 0));
   world.addComponent(player, new Controllable());
   world.addComponent(player, new Rotation());

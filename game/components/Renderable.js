@@ -1,14 +1,19 @@
-// game/components/Renderable.js
+// game/components/Renderable.js 【改造後】
+
+/**
+ * エンティティの描画情報を保持するコンポーネント
+ */
 export class Renderable {
-    /**
-     * @param {string} color
-     * @param {number} width
-     * @param {number} height
-     */
-    constructor(color = 'white', width = 10, height = 10) {
-      this.color = color;
-      this.width = width;
-      this.height = height;
-    }
+  /**
+   * @param {string} color 描画色
+   * @param {number} width 横幅
+   * @param {number} height 高さ
+   * @param {'rectangle' | 'triangle'} shape 形状
+   */
+  constructor(color, width, height, shape = 'rectangle') {
+    this.color = color;
+    this.width = width;
+    this.height = height;
+    this.shape = shape;
   }
-  
+}
