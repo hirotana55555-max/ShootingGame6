@@ -1,18 +1,12 @@
-// game/systems/InputSystem.js 【革命版】
+// game/systems/InputSystem.js 【純粋化版】
 import { InputState } from '../components/InputState.js';
 
 export class InputSystem {
   constructor(world) {
     this.world = world;
-        
-    // 操作対象のエンティティを探し、InputStateコンポーネントをアタッチする
-    // 現状、操作対象は一つだけなので、ここで作ってしまう
     const inputEntity = world.createEntity();
     world.addComponent(inputEntity, new InputState());
     this.inputState = world.getComponent(inputEntity, InputState);
-
-    this.lastPointerX = 0;
-
     this.registerEventListeners();
   }
 
@@ -24,45 +18,32 @@ export class InputSystem {
     const canvas = this.world.canvas;
     if (!canvas) return;
 
+    // マウス/タッチの座標を更新する共通関数
+    const updateTarget = (clientX, clientY) => {
+      const rect = canvas.getBoundingClientRect();
+      this.inputState.target.x = clientX - rect.left;
+      this.inputState.target.y = clientY - rect.top;
+    };
+
     // マウス
-    const onMouseDown = (e) => {
-      this.inputState.isDragging = true;
-      this.lastPointerX = e.clientX;
-    };
-    const onMouseUp = () => { this.inputState.isDragging = false; };
-    const onMouseMove = (e) => {
-      if (!this.inputState.isDragging) return;
-      const pointerX = e.clientX;
-      this.inputState.dragDeltaX = pointerX - this.lastPointerX;
-      this.lastPointerX = pointerX;
-    };
-    canvas.addEventListener('mousedown', onMouseDown);
-    canvas.addEventListener('mouseup', onMouseUp);
-    canvas.addEventListener('mouseleave', onMouseUp);
-    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mousemove', (e) => updateTarget(e.clientX, e.clientY));
+    canvas.addEventListener('mouseleave', () => {
+        this.inputState.target.x = null;
+        this.inputState.target.y = null;
+    });
 
     // タッチ
-    const onTouchStart = (e) => {
-      this.inputState.isDragging = true;
-      this.lastPointerX = e.touches[0].clientX;
-    };
-    const onTouchEnd = () => { this.inputState.isDragging = false; };
-    const onTouchMove = (e) => {
-      if (!this.inputState.isDragging) return;
-      const pointerX = e.touches[0].clientX;
-      this.inputState.dragDeltaX = pointerX - this.lastPointerX;
-      this.lastPointerX = pointerX;
-    };
-    canvas.addEventListener('touchstart', onTouchStart, { passive: false });
-    canvas.addEventListener('touchend', onTouchEnd, { passive: false });
-    canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      updateTarget(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => {
+        this.inputState.target.x = null;
+        this.inputState.target.y = null;
+    });
   }
 
   update(dt) {
-    // 毎フレーム、dragDeltaXをリセットする
-    // これをしないと、ドラッグをやめた後も最後の移動量が残ってしまう
-    if (!this.inputState.isDragging) {
-        this.inputState.dragDeltaX = 0;
-    }
+    // InputSystemはもう毎フレームの更新処理はほとんど何もしない
   }
 }

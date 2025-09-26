@@ -3,7 +3,7 @@ export class InputState {
     constructor() {
       this.keys = new Set();
       this.isDragging = false;
-      this.dragDeltaX = 0; // 1フレームにどれだけドラッグされたか
+      this.target = { x: null, y: null }; // マウス/タップの目標座標
     }
   }
   

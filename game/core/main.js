@@ -4,14 +4,16 @@ import { RenderSystem } from '../systems/RenderSystem.js';
 import { InputSystem } from '../systems/InputSystem.js';
 import { MovementSystem } from '../systems/MovementSystem.js';
 import { createPlayer } from './entityFactory.js';
+import { Controllable } from '../components/Controllable.js';
 
 
 let world;
 let animationFrameId;
 
 let lastTime = 0;
-let frameCount = 0;
 let fps = 0;
+let frames = 0;
+
 
 
 /**
@@ -60,6 +62,12 @@ export function startGame(canvas) {
     // ワールドを更新
     world.update(dt);
 
+    // --- ★★★ここからが視覚デバッグコード★★★ ---
+  // Controllableコンポーネントを持つエンティティの数を数える
+  const controllableEntities = world.getEntities([Controllable]);
+  const playerCount = controllableEntities.length; // ← lengthプロパティを使う
+  // --- ★★★ここまでが視覚デバッグコード★★★ ---
+
     // デバッグ情報描画
     context.fillStyle = 'white';
     context.font = '16px Arial';
@@ -67,6 +75,12 @@ export function startGame(canvas) {
     // dtは非常に大きくなる可能性があるので、表示を調整
     context.fillText(`DeltaTime: ${(dt % 1).toFixed(4)}`, 10, 40); 
     context.fillText('Game Loop is Running!', 10, 60);
+
+    // --- ★★★ここからが視覚デバッグコード★★★ ---
+  context.fillStyle = 'red'; // 目立つように赤色で表示
+  context.font = '24px Arial';
+  context.fillText(`PLAYER COUNT: ${playerCount}`, 10, 100); // プレイヤー数を表示
+  // --- ★★★ここまでが視覚デバッグコード★★★ ---
 
     animationFrameId = requestAnimationFrame(gameLoop);
   }

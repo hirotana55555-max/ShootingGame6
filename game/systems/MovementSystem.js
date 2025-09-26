@@ -1,48 +1,71 @@
-// game/systems/MovementSystem.js 【権限強化版】
-import { Position } from '../components/Position.js';
-import { Velocity } from '../components/Velocity.js';
-import { Controllable } from '../components/Controllable.js';
-import { InputState } from '../components/InputState.js';
+// game/systems/MovementSystem.js 【Lerpモデル・完成版】
+import { Position, Velocity, Controllable, InputState } from '../components/index.js';
+
+// 線形補間関数 (lerp)。2つの値の間を滑らかに補間します。
+function lerp(start, end, amount) {
+  return (1 - amount) * start + amount * end;
+}
 
 export class MovementSystem {
   constructor(world) {
     this.world = world;
   }
 
-  update(dt) {
-    // --- まず、入力状態を取得する ---
-    // InputStateを持つエンティティは一つだけ、という前提
+  update() {
     const inputEntities = this.world.getEntities([InputState]);
-    if (inputEntities.size === 0) return; // 入力エンティティがなければ何もしない
-    const inputState = this.world.getComponent(inputEntities.values().next().value, InputState);
+    if (inputEntities.length === 0) return;
+    const inputState = this.world.getComponent(inputEntities[0], InputState);
 
-    // --- 次に、操作対象のエンティティを処理する ---
     const controllableEntities = this.world.getEntities([Controllable, Position, Velocity]);
-    const moveSpeed = 20;
+    
+    // --- 調整用パラメータ (ここだけ触ればOK) ---
+    const maxSpeed = 7;       // 最高速度
+    const easing = 0.15;      // 追従の滑らかさ (0.1でぬるぬる、0.3でキビキビ。0~1の範囲)
+    const stopRadius = 50.0;   // この半径内に入ったら停止したとみなす
 
     for (const entityId of controllableEntities) {
-      const position = this.world.getComponent(entityId, Position);
-      const velocity = this.world.getComponent(entityId, Velocity);
+      const pos = this.world.getComponent(entityId, Position);
+      const vel = this.world.getComponent(entityId, Velocity);
 
-      // --- 入力状態を解釈し、速度を決定する ---
-      if (inputState.isDragging) {
-        // ドラッグ操作
-        velocity.x = inputState.dragDeltaX * 3; // 係数をかけて動きを調整
-      } else {
-        // キーボード操作
-        velocity.x = 0; // まずリセット
-        if (inputState.keys.has('ArrowLeft') || inputState.keys.has('a')) {
-          velocity.x = -moveSpeed;
+      let targetVelX = 0;
+      let targetVelY = 0;
+
+      // --- 1. 目標速度 (targetVelocity) を決定する ---
+      if (inputState.target.x !== null) { // マウス操作
+        const dx = inputState.target.x - pos.x;
+        const dy = inputState.target.y - pos.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // 目標から一定距離以上離れていれば、目標速度を計算
+        if (dist > stopRadius) {
+            const dirX = dx / dist;
+            const dirY = dy / dist;
+            targetVelX = dirX * maxSpeed;
+            targetVelY = dirY * maxSpeed;
         }
-        if (inputState.keys.has('ArrowRight') || inputState.keys.has('d')) {
-          velocity.x = moveSpeed;
-        }
+        // stopRadius内なら目標速度は(0, 0)のまま。これにより停止する。
+
+      } else { // キーボード操作
+        let dirX = 0;
+        let dirY = 0;
+        if (inputState.keys.has('ArrowLeft')) dirX = -1;
+        if (inputState.keys.has('ArrowRight')) dirX = 1;
+        if (inputState.keys.has('ArrowUp')) dirY = -1;
+        if (inputState.keys.has('ArrowDown')) dirY = 1;
+        
+        targetVelX = dirX * maxSpeed;
+        targetVelY = dirY * maxSpeed;
       }
 
-      // --- 最後に、物理法則を適用する ---
-      // 移動距離 = 速度 × 時間
-      position.x += velocity.x * dt;
-      position.y += velocity.y * dt;
+      // --- 2. 現在の速度を目標速度に滑らかに近づける (Lerp) ---
+      // これがこのコードの心臓部。現在の速度を目標速度に easing の割合で近づける。
+      vel.x = lerp(vel.x, targetVelX, easing);
+      vel.y = lerp(vel.y, targetVelY, easing);
+
+      // --- 3. 位置の更新 ---
+      // 最終的に確定した速度で位置を更新する
+      pos.x += vel.x;
+      pos.y += vel.y;
     }
   }
 }
