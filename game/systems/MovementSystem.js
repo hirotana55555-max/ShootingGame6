@@ -1,4 +1,4 @@
-// game/systems/MovementSystem.js 【キーボード操作修正版】
+// game/systems/MovementSystem.js 【最終解決版】
 import { Position, Velocity, Controllable, InputState } from '../components/index.js';
 
 function lerp(start, end, amount) {
@@ -11,73 +11,76 @@ export class MovementSystem {
   }
 
   update() {
+    // --- Part 1: プレイヤーの「速度」を決定する ---
     const inputEntities = this.world.getEntities([InputState]);
-    if (inputEntities.length === 0) return;
-    const inputState = this.world.getComponent(inputEntities[0], InputState);
+    if (inputEntities.length > 0) {
+        const inputState = this.world.getComponent(inputEntities[0], InputState);
+        const controllableEntities = this.world.getEntities([Controllable, Position, Velocity]);
+        
+        const maxSpeed = 7;
+        const easing = 0.15;
+        const stopRadius = 50.0;
+        const keyAcceleration = 1.0;
+        const keyDrag = 0.95;
 
-    const controllableEntities = this.world.getEntities([Controllable, Position, Velocity]);
-    
-    // --- 調整用パラメータ ---
-    const maxSpeed = 7;
-    const easing = 0.15;      // マウス追従の滑らかさ
-    const stopRadius = 50.0;
-    
-    // ★★★ キーボード用のパラメータを追加 ★★★
-    const keyAcceleration = 1.0; // キーボードの加速度
-    const keyDrag = 0.95;        // キーを離した時の減速率
+        for (const entityId of controllableEntities) {
+            const pos = this.world.getComponent(entityId, Position);
+            const vel = this.world.getComponent(entityId, Velocity);
 
-    for (const entityId of controllableEntities) {
-      const pos = this.world.getComponent(entityId, Position);
-      const vel = this.world.getComponent(entityId, Velocity);
+            if (inputState.target.x !== null) {
+                // マウス操作
+                let targetVelX = 0;
+                let targetVelY = 0;
+                const dx = inputState.target.x - pos.x;
+                const dy = inputState.target.y - pos.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
 
-      if (inputState.target.x !== null) {
-        // --- マウス操作のロジック (変更なし) ---
-        let targetVelX = 0;
-        let targetVelY = 0;
-        const dx = inputState.target.x - pos.x;
-        const dy = inputState.target.y - pos.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > stopRadius) {
+                    const dirX = dx / dist;
+                    const dirY = dy / dist;
+                    targetVelX = dirX * maxSpeed;
+                    targetVelY = dirY * maxSpeed;
+                }
+                vel.x = lerp(vel.x, targetVelX, easing);
+                vel.y = lerp(vel.y, targetVelY, easing);
+            } else {
+                // キーボード操作
+                let dirX = 0;
+                let dirY = 0;
+                if (inputState.keys.has('ArrowLeft')) dirX = -1;
+                if (inputState.keys.has('ArrowRight')) dirX = 1;
+                if (inputState.keys.has('ArrowUp')) dirY = -1;
+                if (inputState.keys.has('ArrowDown')) dirY = 1;
 
-        if (dist > stopRadius) {
-            const dirX = dx / dist;
-            const dirY = dy / dist;
-            targetVelX = dirX * maxSpeed;
-            targetVelY = dirY * maxSpeed;
+                if (dirX !== 0 || dirY !== 0) {
+                    vel.x += dirX * keyAcceleration;
+                    vel.y += dirY * keyAcceleration;
+                } else {
+                    vel.x *= keyDrag;
+                    vel.y *= keyDrag;
+                }
+
+                const speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+                if (speed > maxSpeed) {
+                    const ratio = maxSpeed / speed;
+                    vel.x *= ratio;
+                    vel.y *= ratio;
+                }
+            }
+            // ★★★ 変更点1: プレイヤーの位置更新コードをここから削除 ★★★
         }
-        vel.x = lerp(vel.x, targetVelX, easing);
-        vel.y = lerp(vel.y, targetVelY, easing);
+    }
 
-      } else {
-        // ★★★ キーボード操作のロジック (新方式) ★★★
-        let dirX = 0;
-        let dirY = 0;
-        if (inputState.keys.has('ArrowLeft')) dirX = -1;
-        if (inputState.keys.has('ArrowRight')) dirX = 1;
-        if (inputState.keys.has('ArrowUp')) dirY = -1;
-        if (inputState.keys.has('ArrowDown')) dirY = 1;
+    // ★★★ 変更点2: ここに新しいパートを追加 ★★★
+    // --- Part 2: 全ての「速度を持つもの」の「位置」を更新する ---
+    const movableEntities = this.world.getEntities([Position, Velocity]);
+    for (const entityId of movableEntities) {
+        const pos = this.world.getComponent(entityId, Position);
+        const vel = this.world.getComponent(entityId, Velocity);
 
-        if (dirX !== 0 || dirY !== 0) {
-          // 押している間は、その方向に加速する
-          vel.x += dirX * keyAcceleration;
-          vel.y += dirY * keyAcceleration;
-        } else {
-          // 離している間は、滑らかに減速する
-          vel.x *= keyDrag;
-          vel.y *= keyDrag;
-        }
-
-        // 最高速度を超えないように制限
-        const speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
-        if (speed > maxSpeed) {
-          const ratio = maxSpeed / speed;
-          vel.x *= ratio;
-          vel.y *= ratio;
-        }
-      }
-
-      // --- 3. 位置の更新 (共通) ---
-      pos.x += vel.x;
-      pos.y += vel.y;
+        // 速度に基づいて位置を更新する
+        pos.x += vel.x;
+        pos.y += vel.y;
     }
   }
 }

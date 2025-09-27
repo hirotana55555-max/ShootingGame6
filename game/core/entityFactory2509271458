@@ -1,11 +1,10 @@
-// game/core/entityFactory.js
+// game/core/entityFactory.js 【リファクタリング後】
 
 import { Position } from '../components/Position.js';
 import { Renderable } from '../components/Renderable.js';
 import { Velocity } from '../components/Velocity.js';
 import { Controllable } from '../components/Controllable.js';
 import { Rotation } from '../components/Rotation.js';
-import { Team } from '../components/Team.js'; // ← ★Teamをインポート
 
 /**
  * プレイヤーエンティティを作成して返す
@@ -19,31 +18,44 @@ export function createPlayer(world) {
   }
 
   const player = world.createEntity();
-  world.addComponent(player, new Position(canvas.width / 2, canvas.height - 100));
-  world.addComponent(player, new Renderable('white', 20, 30, 'triangle'));
+  world.addComponent(player, new Position(canvas.width / 2, canvas.height - 80));//縦長50→80
+  //world.addComponent(player, new Renderable('white', 30, 30));　//自機正方形から
+  world.addComponent(player, new Renderable('white', 20, 30, 'triangle'));//自機三角形に
   world.addComponent(player, new Velocity(0, 0));
   world.addComponent(player, new Controllable());
-  world.addComponent(player, new Rotation(0));
-  world.addComponent(player, new Team('player')); // ← ★プレイヤーを'player'チームに所属させる
+  world.addComponent(player, new Rotation());
 
   console.log(`プレイヤーを作成しました (ID: ${player})`);
   return player;
 }
 
-// --- 弾丸生成関数（ステップ2で追加済み） ---
-import { Bullet } from '../components/Bullet.js';
+// --- 将来的には、ここに createEnemy や createBullet などの関数が追加されていく ---
 
+import { Bullet } from '../components/Bullet.js';
+import { Team } from '../components/Team.js';
+
+/**
+ * 弾丸エンティティを作成して返す
+ * @param {import('./World').World} world
+ * @param {object} ownerPosition - 発射主の位置 {x, y}
+ * @param {object} ownerRotation - 発射主の向き {angle}
+ * @param {string} ownerTeam - 発射主のチームID
+ */
 export function createBullet(world, ownerPosition, ownerRotation, ownerTeam) {
   const bullet = world.createEntity();
+
+  // 弾の速度
   const speed = 10.0;
+  // 弾の速度ベクトルを、自機の向き（rotation.angle）から計算
   const vx = Math.sin(ownerRotation.angle) * speed;
   const vy = -Math.cos(ownerRotation.angle) * speed;
 
   world.addComponent(bullet, new Position(ownerPosition.x, ownerPosition.y));
   world.addComponent(bullet, new Velocity(vx, vy));
-  world.addComponent(bullet, new Renderable('yellow', 5, 10, 'rectangle'));
-  world.addComponent(bullet, new Bullet());
-  world.addComponent(bullet, new Team(ownerTeam));
+  world.addComponent(bullet, new Renderable('yellow', 5, 10, 'rectangle')); // 弾は黄色い長方形に
+  world.addComponent(bullet, new Bullet()); // 「これは弾丸です」という目印
+  world.addComponent(bullet, new Team(ownerTeam)); // 発射主と同じチームに所属
 
+  // console.log(`弾を作成しました (ID: ${bullet})`); // デバッグ時に便利
   return bullet;
 }

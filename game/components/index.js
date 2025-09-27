@@ -5,3 +5,5 @@ export * from './Position.js';
 export * from './Renderable.js';
 export * from './Rotation.js';
 export * from './Velocity.js';
+export * from './Bullet.js';
+export * from './Team.js';

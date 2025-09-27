@@ -35,16 +35,6 @@ export class RenderSystem {
         context.rotate(rotation.angle);
       }
 
-      /*
-      // 4. 色を設定し、原点(0,0)を中心に四角形を描画する
-      context.fillStyle = renderable.color;
-      context.fillRect(
-        -renderable.width / 2, 
-        -renderable.height / 2, 
-        renderable.width, 
-        renderable.height
-      );
-      */
       // 4. 色を設定し、原点(0,0)を中心に形状を判定し描画する
       context.fillStyle = renderable.color;
 

@@ -1,4 +1,4 @@
-// game/systems/InputSystem.js 【純粋化版】
+// game/systems/InputSystem.js 【純粋化版・改】
 import { InputState } from '../components/InputState.js';
 
 export class InputSystem {
@@ -11,39 +11,54 @@ export class InputSystem {
   }
 
   registerEventListeners() {
-    // キーボード
-    document.addEventListener('keydown', (e) => this.inputState.keys.add(e.key));
-    document.addEventListener('keyup', (e) => this.inputState.keys.delete(e.key));
-
     const canvas = this.world.canvas;
     if (!canvas) return;
 
-    // マウス/タッチの座標を更新する共通関数
+    // --- キーボード ---
+    document.addEventListener('keydown', (e) => this.inputState.keys.add(e.key));
+    document.addEventListener('keyup', (e) => this.inputState.keys.delete(e.key));
+
+    // --- マウス/タッチ座標 ---
     const updateTarget = (clientX, clientY) => {
       const rect = canvas.getBoundingClientRect();
       this.inputState.target.x = clientX - rect.left;
       this.inputState.target.y = clientY - rect.top;
     };
 
-    // マウス
-    canvas.addEventListener('mousemove', (e) => updateTarget(e.clientX, e.clientY));
-    canvas.addEventListener('mouseleave', () => {
-        this.inputState.target.x = null;
-        this.inputState.target.y = null;
-    });
+    const clearTarget = () => {
+      this.inputState.target.x = null;
+      this.inputState.target.y = null;
+    };
 
-    // タッチ
+    canvas.addEventListener('mousemove', (e) => updateTarget(e.clientX, e.clientY));
+    canvas.addEventListener('mouseleave', clearTarget);
     canvas.addEventListener('touchmove', (e) => {
       e.preventDefault();
       updateTarget(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: false });
-    canvas.addEventListener('touchend', () => {
-        this.inputState.target.x = null;
-        this.inputState.target.y = null;
-    });
+    // touchendでは座標のみクリアする
+    canvas.addEventListener('touchend', clearTarget);
+
+    // ★★★ ここからが改造部分 ★★★
+    // --- マウスクリック/タッチ ---
+    const handleMouseDown = (e) => {
+      e.preventDefault(); // ダブルタップでのズームなどを防ぐ
+      this.inputState.isMouseDown = true;
+    };
+
+    const handleMouseUp = () => {
+      this.inputState.isMouseDown = false;
+    };
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
+    // touchendは座標クリアのリスナーが既にあるので、mouseupの処理を共通化
+    canvas.addEventListener('touchend', handleMouseUp);
+    // ★★★ ここまでが改造部分 ★★★
   }
 
   update(dt) {
-    // InputSystemはもう毎フレームの更新処理はほとんど何もしない
+    // InputSystemはイベント駆動なので何もしない
   }
 }

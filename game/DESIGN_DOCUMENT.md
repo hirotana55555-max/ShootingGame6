@@ -53,30 +53,36 @@
 
 プロジェクトのファイルは、以下の役割に従って各ディレクトリに配置する。
 
-- **/ (ルート)**
+- **`/ (ルート)`**
     - `DESIGN_DOCUMENT.md`: この設計思想書。
     - `package.json`: プロジェクトの依存関係を管理する。
     - `*.tsx`, `*.css`: Reactコンポーネントとスタイルシート。UI（ガワ）に関するファイル。
 
-- **/game**
+- **`/game`**
     - プロジェクトの心臓部。ECSのゲームロジック全体を格納する。
 
-- **/game/components**
+- **`/game/components`**
     - **コンポーネント**を格納する。
     - ファイルは`Position.js`のように、コンポーネント名で命名する。
     - 中身は、データとその初期値を持つ`class`定義のみ。ロジックを含まない。
     - `index.js`ですべてのコンポーネントを`export`し、外部から参照しやすくする。
 
-- **/game/systems**
+- **`/game/systems`**
     - **システム**を格納する。
     - ファイルは`MovementSystem.js`のように、役割で命名する。
     - 各システムは、特定のコンポーネントを持つエンティティに対するロジック（振る舞い）を定義する。
 
-- **/game/core**
+- **`/game/core`**
     - ECSフレームワークの**中核**となるファイルを格納する。
     - `World.js`: エンティティ、コンポーネント、システムを統括する世界そのもの。
     - `main.js`: ゲーム全体の初期化とゲームループを管理するエントリーポイント。
     - `entityFactory.js`: プレイヤーや敵など、特定のエンティティを生成するための「工場」。
+
+- **`/game/entities` (★追記)**
+    - **(未使用)** 将来的に、特定のエンティティに紐づく複雑な設定ファイルなどを格納する可能性があるため予約。
+
+- **`/game/utils` (★追記)**
+    - **(未使用)** 複数のシステムやコンポーネントから利用される、汎用的な便利関数（ベクトル計算など）を格納する。
 
 ❯ npx tree-node-cli -I "node_modules"
 ShootingGame6
@@ -91,24 +97,31 @@ ShootingGame6
 ├── game
 │   ├── DESIGN_DOCUMENT.md
 │   ├── components
+│   │   ├── Bullet.js
 │   │   ├── Controllable.js
 │   │   ├── InputState.js
 │   │   ├── Position.js
 │   │   ├── Renderable.js
 │   │   ├── Rotation.js
+│   │   ├── Team.js
 │   │   ├── Velocity.js
 │   │   └── index.js
 │   ├── core
 │   │   ├── System.js
 │   │   ├── World.js
 │   │   ├── entityFactory.js
-│   │   └── main.js
+│   │   ├── entityFactory2509271458
+│   │   ├── main.js
+│   │   └── main2509271451
 │   ├── entities
 │   ├── systems
 │   │   ├── InputSystem.js
+│   │   ├── InputSystem2509271447
 │   │   ├── MovementSystem.js
+│   │   ├── MovementSystem2509271503
 │   │   ├── RenderSystem.js
-│   │   └── RotationSystem.js
+│   │   ├── RotationSystem.js
+│   │   └── ShootingSystem.js
 │   └── utils
 │       └── Vector2.js
 ├── next-env.d.ts
@@ -121,6 +134,5 @@ ShootingGame6
 │   └── vercel.svg
 ├── tailwind.config.ts
 └── tsconfig.json
-
 ---
 *最終更新日: 2025年9月27日*
