@@ -96,9 +96,14 @@ ShootingGame6
 │   └── GameCanvas.tsx
 ├── game
 │   ├── DESIGN_DOCUMENT.md
+│   ├── DESIGN_DOCUMENT_ENEMY.md
+│   ├── REFACTORING_PLAN.md
 │   ├── components
 │   │   ├── Bullet.js
+│   │   ├── Collidable.js
 │   │   ├── Controllable.js
+│   │   ├── Generator.js
+│   │   ├── Health.js
 │   │   ├── InputState.js
 │   │   ├── Lifetime.js
 │   │   ├── Position.js
@@ -110,20 +115,19 @@ ShootingGame6
 │   ├── core
 │   │   ├── System.js
 │   │   ├── World.js
-│   │   ├── World2509271624
 │   │   ├── entityFactory.js
-│   │   ├── entityFactory2509271637
+│   │   ├── entityFactory2509271952
 │   │   ├── main.js
-│   │   └── main2509271612
+│   │   └── main2509272012
 │   ├── systems
 │   │   ├── DebugSystem.js
-│   │   ├── DebugSystem2509271655
 │   │   ├── InputSystem.js
 │   │   ├── LifetimeSystem.js
 │   │   ├── MovementSystem.js
 │   │   ├── RenderSystem.js
 │   │   ├── RotationSystem.js
-│   │   └── ShootingSystem.js
+│   │   ├── ShootingSystem.js
+│   │   └── SpawningSystem.js
 │   └── utils
 │       └── Vector2.js
 ├── next-env.d.ts
@@ -136,5 +140,6 @@ ShootingGame6
 │   └── vercel.svg
 ├── tailwind.config.ts
 └── tsconfig.json
+
 ---
 *最終更新日: 2025年9月27日*

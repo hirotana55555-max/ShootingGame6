@@ -8,3 +8,7 @@ export * from './Velocity.js';
 export * from './Bullet.js';
 export * from './Team.js';
 export * from './Lifetime.js';
+export * from './Health.js';
+export * from './Collidable.js';
+export * from './Generator.js';
+

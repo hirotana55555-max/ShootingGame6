@@ -1,16 +1,9 @@
-// game/core/entityFactory.js
+// game/core/entityFactory.js 【Lifetime追加版】
 
-import { Position } from '../components/Position.js';
-import { Renderable } from '../components/Renderable.js';
-import { Velocity } from '../components/Velocity.js';
-import { Controllable } from '../components/Controllable.js';
-import { Rotation } from '../components/Rotation.js';
-import { Team } from '../components/Team.js'; // ← ★Teamをインポート
+import { Position, Renderable, Velocity, Controllable, Rotation, Team, Bullet, Lifetime } from '../components/index.js';
 
 /**
  * プレイヤーエンティティを作成して返す
- * @param {import('./World').World} world
- * @returns {number} 作成されたプレイヤーエンティティのID
  */
 export function createPlayer(world) {
   const canvas = world.canvas;
@@ -24,15 +17,15 @@ export function createPlayer(world) {
   world.addComponent(player, new Velocity(0, 0));
   world.addComponent(player, new Controllable());
   world.addComponent(player, new Rotation(0));
-  world.addComponent(player, new Team('player')); // ← ★プレイヤーを'player'チームに所属させる
+  world.addComponent(player, new Team('player'));
 
   console.log(`プレイヤーを作成しました (ID: ${player})`);
   return player;
 }
 
-// --- 弾丸生成関数（ステップ2で追加済み） ---
-import { Bullet } from '../components/Bullet.js';
-
+/**
+ * 弾丸エンティティを作成して返す
+ */
 export function createBullet(world, ownerPosition, ownerRotation, ownerTeam) {
   const bullet = world.createEntity();
   const speed = 10.0;
@@ -44,6 +37,7 @@ export function createBullet(world, ownerPosition, ownerRotation, ownerTeam) {
   world.addComponent(bullet, new Renderable('yellow', 5, 10, 'rectangle'));
   world.addComponent(bullet, new Bullet());
   world.addComponent(bullet, new Team(ownerTeam));
+  world.addComponent(bullet, new Lifetime(0.8)); // ← ★★★ 弾に3秒の寿命を設定 ★★★
 
   return bullet;
 }
