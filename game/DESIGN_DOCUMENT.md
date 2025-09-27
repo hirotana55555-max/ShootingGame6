@@ -100,6 +100,7 @@ ShootingGame6
 │   │   ├── Bullet.js
 │   │   ├── Controllable.js
 │   │   ├── InputState.js
+│   │   ├── Lifetime.js
 │   │   ├── Position.js
 │   │   ├── Renderable.js
 │   │   ├── Rotation.js
@@ -109,16 +110,17 @@ ShootingGame6
 │   ├── core
 │   │   ├── System.js
 │   │   ├── World.js
+│   │   ├── World2509271624
 │   │   ├── entityFactory.js
-│   │   ├── entityFactory2509271458
+│   │   ├── entityFactory2509271637
 │   │   ├── main.js
-│   │   └── main2509271451
-│   ├── entities
+│   │   └── main2509271612
 │   ├── systems
+│   │   ├── DebugSystem.js
+│   │   ├── DebugSystem2509271655
 │   │   ├── InputSystem.js
-│   │   ├── InputSystem2509271447
+│   │   ├── LifetimeSystem.js
 │   │   ├── MovementSystem.js
-│   │   ├── MovementSystem2509271503
 │   │   ├── RenderSystem.js
 │   │   ├── RotationSystem.js
 │   │   └── ShootingSystem.js

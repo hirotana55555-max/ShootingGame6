@@ -7,3 +7,4 @@ export * from './Rotation.js';
 export * from './Velocity.js';
 export * from './Bullet.js';
 export * from './Team.js';
+export * from './Lifetime.js';

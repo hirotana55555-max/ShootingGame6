@@ -1,80 +1,60 @@
-// game/core/main.js 【再投入・修正版】
+// game/core/main.js 【dt計算修正・最終版】
 
 import { World } from './World.js';
+// (import文は変更なし)
 import { RenderSystem } from '../systems/RenderSystem.js';
 import { InputSystem } from '../systems/InputSystem.js';
 import { MovementSystem } from '../systems/MovementSystem.js';
 import { RotationSystem } from '../systems/RotationSystem.js';
-import { ShootingSystem } from '../systems/ShootingSystem.js'; // ← ★1. ShootingSystemをインポート
+import { ShootingSystem } from '../systems/ShootingSystem.js';
+import { LifetimeSystem } from '../systems/LifetimeSystem.js';
+import { DebugSystem } from '../systems/DebugSystem.js';
 import { createPlayer } from './entityFactory.js';
-import { Controllable } from '../components/Controllable.js';
-
 
 let world;
 let animationFrameId;
 
-let lastTime = 0;
-let fps = 0;
-let frames = 0;
-
-/**
- * ゲームを開始する
- * @param {HTMLCanvasElement} canvas
- */
 export function startGame(canvas) {
+  // (startGameのシステム追加部分は変更なし)
   console.log("ゲームを開始します...");
   const context = canvas.getContext('2d');
   world = new World();
   world.canvas = canvas;
   world.context = context;
 
-  // --- システムの追加（順序が重要） ---
-  world.addSystem(new InputSystem(world));      // 1. 入力を検知
-  world.addSystem(new ShootingSystem(world));   // 2. 入力に基づき発射 ← ★2. ここに追加
-  world.addSystem(new MovementSystem(world));   // 3. プレイヤーを操作・移動
-  world.addSystem(new RotationSystem(world));   // 4. プレイヤーを回転
-  world.addSystem(new RenderSystem(world));     // 5. 全てを描画
+  world.addSystem(new InputSystem(world));
+  world.addSystem(new LifetimeSystem(world));
+  world.addSystem(new ShootingSystem(world));
+  world.addSystem(new MovementSystem(world));
+  world.addSystem(new RotationSystem(world));
+  world.addSystem(new RenderSystem(world));
+  world.addSystem(new DebugSystem(world));
 
-  // --- エンティティの創造 ---
   createPlayer(world);
 
-
+  // --- gameLoopの修正 ---
+  let lastTime = 0;
   function gameLoop(currentTime) {
-    // ( ... gameLoopの中身は変更ありません ... )
     if (lastTime === 0) {
         lastTime = currentTime;
     }
+    // ★★★ dtの計算をここに集約 ★★★
     const dt = (currentTime - lastTime) / 1000;
-    frames++;
-    if (currentTime >= lastTime + 1000) {
-        fps = frames;
-        frames = 0;
-        lastTime = currentTime;
-    }
-    const context = world.context;
+    lastTime = currentTime;
+
     context.clearRect(0, 0, world.canvas.width, world.canvas.height);
     context.fillStyle = 'black';
     context.fillRect(0, 0, world.canvas.width, world.canvas.height);
+
+    // ★★★ 計算したdtをworld.updateに渡す ★★★
     world.update(dt);
-    const controllableEntities = world.getEntities([Controllable]);
-    const playerCount = controllableEntities.length;
-    context.fillStyle = 'white';
-    context.font = '16px Arial';
-    context.fillText(`FPS: ${fps}`, 10, 20);
-    context.fillText(`DeltaTime: ${(dt % 1).toFixed(4)}`, 10, 40); 
-    context.fillText('Game Loop is Running!', 10, 60);
-    context.fillStyle = 'red';
-    context.font = '24px Arial';
-    context.fillText(`PLAYER COUNT: ${playerCount}`, 10, 100);
+
     animationFrameId = requestAnimationFrame(gameLoop);
   }
 
   gameLoop(performance.now());
 }
 
-/**
- * ゲームを停止する
- */
 export function stopGame() {
   console.log("ゲームを停止します。");
   cancelAnimationFrame(animationFrameId);
