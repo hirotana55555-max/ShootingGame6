@@ -46,16 +46,6 @@ export function startGame(canvas) {
     context.fillStyle = 'black';
     context.fillRect(0, 0, world.canvas.width, world.canvas.height);
 
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    // ★ 原因切り分けのため、currentTimeを直接描画してみる ★
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    context.fillStyle = 'yellow';
-    context.font = '16px Arial';
-    context.fillText(`CurrentTime: ${currentTime}`, 10, 140);
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-
-
-
     // ★★★ 計算したdtをworld.updateに渡す ★★★
     world.update(dt);
 

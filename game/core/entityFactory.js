@@ -37,7 +37,7 @@ export function createBullet(world, ownerPosition, ownerRotation, ownerTeam) {
   world.addComponent(bullet, new Renderable('yellow', 5, 10, 'rectangle'));
   world.addComponent(bullet, new Bullet());
   world.addComponent(bullet, new Team(ownerTeam));
-  world.addComponent(bullet, new Lifetime(3.0)); // ← ★★★ 弾に3秒の寿命を設定 ★★★
+  world.addComponent(bullet, new Lifetime(0.8)); // ← ★★★ 弾に3秒の寿命を設定 ★★★
 
   return bullet;
 }
