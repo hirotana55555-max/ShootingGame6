@@ -1,4 +1,4 @@
-// game/systems/LifetimeSystem.js
+// game/systems/LifetimeSystem.js 
 
 import { Lifetime } from '../components/index.js';
 

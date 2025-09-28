@@ -1,4 +1,4 @@
-// game/systems/ShootingSystem.js
+// game/systems/ShootingSystem.js 
 
 import { Controllable, InputState, Position, Rotation, Team } from '../components/index.js';
 import { createBullet } from '../core/entityFactory.js';

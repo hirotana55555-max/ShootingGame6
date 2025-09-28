@@ -1,4 +1,4 @@
-// game/components/Position.js
+// game/components/Position.js 
 export class Position {
     /**
      * @param {number} x

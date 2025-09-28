@@ -1,4 +1,4 @@
-// game/components/InputState.js
+// game/components/InputState.js 
 
 /**
  * ユーザーの入力状態を保持するコンポーネント。

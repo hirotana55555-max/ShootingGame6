@@ -6,7 +6,7 @@ export class DamageSystem {
   }
 
   update(dt) {
-    // 1. 今フレームに発行されたイベントをすべて取得
+    // 1. 今フレームに発行されたイベントをすべて取得 
     const events = this.world.getEvents();
 
     // 2. 'collision' イベントだけを抜き出して処理する

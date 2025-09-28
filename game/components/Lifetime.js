@@ -1,4 +1,4 @@
-// game/components/Lifetime.js
+// game/components/Lifetime.js 
 
 /**
  * エンティティの寿命を管理するコンポーネント。

@@ -44,7 +44,6 @@ export class RenderSystem {
 
       // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
       // ★ ここからが当たり判定を可視化するデバッグコードです
-      // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
       
       // 1. もしこのエンティティがCollidableコンポーネントを持っていたら...
       const collidable = this.world.getComponent(entityId, Collidable);

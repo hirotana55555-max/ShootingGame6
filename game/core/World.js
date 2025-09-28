@@ -1,3 +1,4 @@
+//World.js
 export class World {
   constructor() {
     this.entities = new Set();

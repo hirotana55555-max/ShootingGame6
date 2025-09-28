@@ -1,4 +1,4 @@
-// game/components/Renderable.js 【改造後】
+// game/components/Renderable.js
 
 /**
  * エンティティの描画情報を保持するコンポーネント

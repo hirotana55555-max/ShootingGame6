@@ -7,7 +7,7 @@ export class DebugSystem {
     this.world = world;
     this.fps = 0;
     this.frames = 0;
-    this.lastFpsUpdateTime = 0; // FPS更新専用のタイムスタンプ
+    this.lastFpsUpdateTime = 0; // FPS更新専用のタイムスタンプ 
   }
 
   update(dt) { // ← main.jsから渡されるdtを正しく使う

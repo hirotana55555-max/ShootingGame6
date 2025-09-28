@@ -1,4 +1,4 @@
-// game/components/index.js
+// game/components/index.js 
 export * from './Controllable.js';
 export * from './InputState.js';
 export * from './Position.js';

@@ -1,4 +1,4 @@
-# 敵・衝突・AIに関する設計書 (DESIGN_DOCUMENT_ENEMY.md)
+# 敵・衝突・AIに関する設計書 (DESIGN_DOCUMENT_ENEMY.md) 
 
 ## 1. 基本思想
 

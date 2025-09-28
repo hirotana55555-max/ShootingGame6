@@ -1,4 +1,4 @@
-// game/systems/InputSystem.js 【純粋化版・改】
+// game/systems/InputSystem.js
 import { InputState } from '../components/InputState.js';
 
 export class InputSystem {

@@ -1,4 +1,4 @@
-// game/systems/MovementSystem.js 【DeltaTime対応版】
+// game/systems/MovementSystem.js
 
 import { Position, Velocity, Controllable, InputState } from '../components/index.js';
 

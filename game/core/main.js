@@ -1,4 +1,4 @@
-// game/core/main.js 【dt計算修正・最終版】
+// game/core/main.js
 
 import { World } from './World.js';
 // (import文は変更なし)

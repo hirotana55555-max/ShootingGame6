@@ -1,5 +1,4 @@
 # プロジェクト設計思想書 (DESIGN_DOCUMENT.md)
-
 ## 1. 基本理念
 
 本プロジェクトは、スマートフォン（縦画面）でのプレイを想定した2Dシューティングゲームである。
@@ -122,7 +121,6 @@ ShootingGame6
 │   │   └── main2509281915
 │   ├── systems
 │   │   ├── CollisionSystem.js
-│   │   ├── CollisionSystem2509281953
 │   │   ├── DamageSystem.js
 │   │   ├── DeathSystem.js
 │   │   ├── DebugSystem.js
@@ -146,4 +144,4 @@ ShootingGame6
 ├── tailwind.config.ts
 └── tsconfig.json
 ---
-*最終更新日: 2025年9月28日20:19*
+*最終更新日: 2025年9月29日00:01*

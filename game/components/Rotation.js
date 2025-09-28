@@ -1,4 +1,4 @@
-// game/components/Rotation.js
+// game/components/Rotation.js 
 
 /**
  * エンティティの回転状態を保持するコンポーネント

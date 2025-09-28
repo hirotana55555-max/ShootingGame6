@@ -1,4 +1,4 @@
-// game/components/Velocity.js
+// game/components/Velocity.js 
 export class Velocity {
     /**
      * @param {number} x

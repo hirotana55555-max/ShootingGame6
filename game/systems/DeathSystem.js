@@ -6,7 +6,7 @@ export class DeathSystem {
   }
 
   update(dt) {
-    // 1. Healthコンポーネントを持つエンティティをすべて取得
+    // 1. Healthコンポーネントを持つエンティティをすべて取得 
     const entities = this.world.getEntities([Health]);
 
     for (const entityId of entities) {

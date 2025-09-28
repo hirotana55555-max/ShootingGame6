@@ -1,4 +1,4 @@
-// game/components/Team.js
+// game/components/Team.js 
 
 export class Team {
     /**
