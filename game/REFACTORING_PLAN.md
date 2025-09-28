@@ -6,7 +6,7 @@
 
 本計画の目的は、この問題を未然に防ぎ、エンティティの定義をコードからデータに分離すること（データ駆動設計）で、将来的な拡張性と保守性を確保することにある。
 
-## 2. 解決策：ブループリント（設計図）方式への移行
+## 2. 解決策：ブループリント方式への移行
 
 エンティティの定義（どのコンポーネントを、どのような初期値で組み合わせるか）を、JavaScriptの関数ではなく、外部のデータファイル（例: JSON）に「ブループリント」として記述する方式に移行する。
 
@@ -28,6 +28,8 @@
 
 ### 2.2. ブループリントファイルの例 (`meteor.json`)
 
+ブループリントのパラメータは、コンストラクタに渡すオブジェクトそのものとして定義する。
+
 ```json
 {
   "name": "Meteor",
@@ -43,14 +45,13 @@
 
 ### 2.3. `entityFactory.js`の将来像
 
-個別の`create`関数を廃止し、代わりに`createEntityFromBlueprint`という単一の汎用関数を実装する。
+個別の`create`関数を廃止し、代わりに`createEntityFromBlueprint`という単一の汎用関数を実装する。この際、引数の順序に依存しない、堅牢な実装を採用する。
 
 ```javascript
 import * as Components from '../components/index.js';
 import meteorBlueprint from '../blueprints/meteor.json';
 // ... 他のブループリントもインポート
 
-// すべてのブループリントを一つのオブジェクトで管理
 const blueprints = {
   meteor: meteorBlueprint,
   // ...
@@ -67,19 +68,14 @@ export function createEntityFromBlueprint(world, blueprintName, overrides = {}) 
   if (!blueprint) throw new Error(`ブループリント'${blueprintName}'が見つかりません。`);
 
   const entity = world.createEntity();
+  const initialComponents = { ...blueprint.components, ...overrides };
 
-  // ブループリントに基づいてコンポーネントを追加
-  for (const componentName in blueprint.components) {
-    const params = blueprint.components[componentName];
-    // new Components['Position'](x, y) のように動的にインスタンス化
-    world.addComponent(entity, new Components[componentName](...Object.values(params)));
+  for (const componentName in initialComponents) {
+    const params = initialComponents[componentName];
+    // new Components['Position']({ x: 10, y: 20 }) のように呼び出す。
+    // 引数の順序に依存せず、安全にインスタンス化できる。
+    world.addComponent(entity, new Components[componentName](params));
   }
-
-  // overridesで指定されたコンポーネント（主にPosition）を上書き
-  if (overrides.Position) {
-    world.addComponent(entity, new Components.Position(overrides.Position.x, overrides.Position.y));
-  }
-  // ...他のoverride処理...
 
   return entity;
 }
@@ -91,10 +87,11 @@ export function createEntityFromBlueprint(world, blueprintName, overrides = {}) 
 
 *   **トリガー:** **敵エンティティの種類が3種類以上に増え、`entityFactory.js`の管理が煩雑になってきたと感じた時点**で、本計画に着手する。
 *   **移行手順:**
-    1.  まず`meteor`（隕石）からブループリント化を試みる。
-    2.  `createEntityFromBlueprint`関数を実装し、`createMeteor`を置き換える。
-    3.  動作確認後、他のエンティティ（`player`, `bullet`など）も順次ブループrint化していく。
+    1.  **【最重要】全コンポーネントの`constructor`をオブジェクト引数形式に統一する。**
+        *   例: `constructor(x, y)` を `constructor({ x, y })` に変更する。
+        *   これにより、引数の順序の問題が根本的に解決される。
+    2.  `createEntityFromBlueprint`関数を上記2.3の通りに実装する。
+    3.  まず`meteor`（隕石）からブループリント化を試みる。`SpawningSystem`が`createEntityFromBlueprint`を呼び出すように修正する。
+    4.  動作確認後、他のエンティティ（`player`, `bullet`など）も順次ブループリント化していく。
 
 この計画に従うことで、プロジェクトの健全性を長期的に維持する。
-
----

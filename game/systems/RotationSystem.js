@@ -15,7 +15,7 @@ export class RotationSystem {
     this.world = world;
   }
 
-  update() {
+  update(dt) {
     // VelocityとRotationの両方を持つエンティティを探す
     const entities = this.world.getEntities([Velocity, Rotation]);
 

@@ -9,7 +9,7 @@
 
 - **デバイス:** Samsung Galaxy Fold 6 (DeXモード)
 - **IDE:** BlitzIDE (Webベース)
-- **フレームワーク:** React (UI/Canvasのガワ担当) + 自作ECS (ゲームロジック担当)
+- **フレームワーク:** React (UI/Canvasのガワ担当) + 自作ECS (ゲームロジック担当)JavaScript
 - **制約:**
     - `index.html`は直接編集不可。Canvasのサイズ等はReactコンポーネント(`GameCanvas.tsx`)で管理する。
     - Webベース環境のため、デバッグやファイル操作に一部制限がある。
@@ -115,6 +115,7 @@ ShootingGame6
 │   ├── core
 │   │   ├── System.js
 │   │   ├── World.js
+│   │   ├── World2509280910
 │   │   ├── entityFactory.js
 │   │   ├── entityFactory2509271952
 │   │   ├── main.js
@@ -123,10 +124,12 @@ ShootingGame6
 │   │   ├── DebugSystem.js
 │   │   ├── InputSystem.js
 │   │   ├── LifetimeSystem.js
+│   │   ├── LifetimeSystem2509280937
 │   │   ├── MovementSystem.js
 │   │   ├── RenderSystem.js
 │   │   ├── RotationSystem.js
 │   │   ├── ShootingSystem.js
+│   │   ├── ShootingSystem2509280938
 │   │   └── SpawningSystem.js
 │   └── utils
 │       └── Vector2.js
@@ -142,4 +145,4 @@ ShootingGame6
 └── tsconfig.json
 
 ---
-*最終更新日: 2025年9月27日*
+*最終更新日: 2025年9月28日10:28*

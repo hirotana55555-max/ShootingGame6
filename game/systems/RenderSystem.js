@@ -12,7 +12,7 @@ export class RenderSystem {
     this.query = [Position, Renderable]; 
   }
 
-  update() {
+  update(dt) {
     const context = this.world.context;
     const entities = this.world.getEntities(this.query);
 

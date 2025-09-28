@@ -9,7 +9,7 @@ export class ShootingSystem {
     this.query = [Controllable, Position, Rotation, Team]; // 射撃可能なエンティティの条件
   }
 
-  update(dt) {
+  update() {
     // 1. 入力状態を取得
     const inputEntities = this.world.getEntities([InputState]);
     if (inputEntities.length === 0) return;

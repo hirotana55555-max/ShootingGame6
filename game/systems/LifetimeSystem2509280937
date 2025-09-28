@@ -19,8 +19,7 @@ export class LifetimeSystem {
 
       // 2. もしタイマーが0以下になったら、エンティティをワールドから削除する
       if (lifetime.timer <= 0) {
-        //this.world.removeEntity(entityId);//繰り返し中即削除は危険
-        this.world.markForRemoval(entityId);// ★まとめて削除に修正
+        this.world.removeEntity(entityId);
       }
     }
   }

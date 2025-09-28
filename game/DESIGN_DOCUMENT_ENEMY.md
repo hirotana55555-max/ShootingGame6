@@ -19,11 +19,15 @@
     *   役割: エンティティの耐久値を管理する。
     *   用途: 敵、破壊可能な障害物、プレイヤーなど。
 
-*   **`Collidable`**: `(shape, size, group)`
-    *   役割: 物理的な当たり判定の形状とサイズを定義する。
-    *   `shape`: 'circle', 'rectangle' など。
-    *   `size`: `{ radius: 10 }`, `{ width: 20, height: 30 }` など。
-    *   `group`: 'enemy', 'player_bullet', 'player' など、衝突判定のグループ分けに使用。
+*   **`Collidable`**: 
+    *   **現状の実装**: `(group, radius)`
+        *   役割: **円形**の当たり判定を持つことを示す。
+        *   `group`: 'enemy', 'player_bullet', 'player' など。衝突判定のグループ分けに使用。
+        *   `radius`: 当たり判定の半径。
+    *   **将来の拡張予定**: `(shape, size, group)`
+        *   `shape`: 'circle', 'rectangle' など。
+        *   `size`: `{ radius: 10 }`, `{ width: 20, height: 30 }` など。
+        *   ※ 現在は円形のみ対応。矩形などは今後の実装課題。
 
 ### 2.2. AIと振る舞い
 

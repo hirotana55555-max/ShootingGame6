@@ -1,5 +1,4 @@
-// game/systems/MovementSystem.js 【DeltaTime対応版】
-
+// game/systems/MovementSystem.js 【最終解決版】
 import { Position, Velocity, Controllable, InputState } from '../components/index.js';
 
 function lerp(start, end, amount) {
@@ -11,10 +10,7 @@ export class MovementSystem {
     this.world = world;
   }
 
-  /**
-   * @param {number} dt - 前フレームからの経過時間（秒単位）
-   */
-  update(dt) {
+  update() {
     // --- Part 1: プレイヤーの「速度」を決定する ---
     const inputEntities = this.world.getEntities([InputState]);
     if (inputEntities.length > 0) {
@@ -71,19 +67,20 @@ export class MovementSystem {
                     vel.y *= ratio;
                 }
             }
-            // ★ プレイヤーの位置更新は Part 2 で一括処理
+            // ★★★ 変更点1: プレイヤーの位置更新コードをここから削除 ★★★
         }
     }
 
+    // ★★★ 変更点2: ここに新しいパートを追加 ★★★
     // --- Part 2: 全ての「速度を持つもの」の「位置」を更新する ---
     const movableEntities = this.world.getEntities([Position, Velocity]);
     for (const entityId of movableEntities) {
         const pos = this.world.getComponent(entityId, Position);
         const vel = this.world.getComponent(entityId, Velocity);
 
-        // ★ DeltaTime対応：60FPS基準の速度を維持
-        pos.x += vel.x * dt * 60;
-        pos.y += vel.y * dt * 60;
+        // 速度に基づいて位置を更新する
+        pos.x += vel.x;
+        pos.y += vel.y;
     }
   }
 }
