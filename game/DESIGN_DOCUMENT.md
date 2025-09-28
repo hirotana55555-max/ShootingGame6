@@ -12,7 +12,7 @@
 - **フレームワーク:** React (UI/Canvasのガワ担当) + 自作ECS (ゲームロジック担当)JavaScript
 - **制約:**
     - `index.html`は直接編集不可。Canvasのサイズ等はReactコンポーネント(`GameCanvas.tsx`)で管理する。
-    - Webベース環境のため、デバッグやファイル操作に一部制限がある。
+    - Webベース環境のため、デバッグやファイル操作に一部制限がある。開発者コンソールは使用できない
 
 ## 3. アーキテクチャ方針
 
@@ -85,6 +85,7 @@
     - **(未使用)** 複数のシステムやコンポーネントから利用される、汎用的な便利関数（ベクトル計算など）を格納する。
 
 ❯ npx tree-node-cli -I "node_modules"
+
 ShootingGame6
 ├── README.md
 ├── app
@@ -115,21 +116,22 @@ ShootingGame6
 │   ├── core
 │   │   ├── System.js
 │   │   ├── World.js
-│   │   ├── World2509280910
+│   │   ├── World2509281951
 │   │   ├── entityFactory.js
-│   │   ├── entityFactory2509271952
 │   │   ├── main.js
-│   │   └── main2509272012
+│   │   └── main2509281915
 │   ├── systems
+│   │   ├── CollisionSystem.js
+│   │   ├── CollisionSystem2509281953
+│   │   ├── DamageSystem.js
+│   │   ├── DeathSystem.js
 │   │   ├── DebugSystem.js
 │   │   ├── InputSystem.js
 │   │   ├── LifetimeSystem.js
-│   │   ├── LifetimeSystem2509280937
 │   │   ├── MovementSystem.js
 │   │   ├── RenderSystem.js
 │   │   ├── RotationSystem.js
 │   │   ├── ShootingSystem.js
-│   │   ├── ShootingSystem2509280938
 │   │   └── SpawningSystem.js
 │   └── utils
 │       └── Vector2.js
@@ -143,6 +145,5 @@ ShootingGame6
 │   └── vercel.svg
 ├── tailwind.config.ts
 └── tsconfig.json
-
 ---
-*最終更新日: 2025年9月28日10:28*
+*最終更新日: 2025年9月28日20:19*

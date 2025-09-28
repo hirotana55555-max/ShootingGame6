@@ -1,14 +1,12 @@
-// game/core/World.js 【removeEntity追加版】
-
-/**
- * ECSの世界全体を管理するクラス
- */
 export class World {
   constructor() {
     this.entities = new Set();
     this.components = new Map();
     this.systems = [];
     this.nextEntityId = 0;
+
+    // ★追加：削除予約を格納するセット（初期化）
+    this.pendingRemovals = new Set();
   }
 
   createEntity() {
@@ -25,21 +23,35 @@ export class World {
     this.components.get(componentName).set(entityId, component);
   }
 
-  // ★★★ ここからが改造部分 ★★★
-  /**
-   * エンティティをワールドから削除する
-   * @param {number} entityId 削除するエンティティのID
-   */
   removeEntity(entityId) {
-    // 1. 全エンティティのリストからIDを削除
+    // 注意: これは「即時削除」をする関数。
+    // 基本は markForRemoval を使って「あとでまとめて削除」する方が安全です。
     this.entities.delete(entityId);
-
-    // 2. このエンティティが持っていた全てのコンポーネントを削除
     for (const componentMap of this.components.values()) {
       componentMap.delete(entityId);
     }
   }
-  // ★★★ ここまでが改造部分 ★★★
+
+  // ←★★★ この位置に追加（removeEntity の直後が読みやすい） ★★★
+  /**
+   * 削除を予約する（すぐには消さない）
+   * system の中からは基本これを呼ぶ
+   * @param {number} entityId
+   */
+  markForRemoval(entityId) {
+    if (!this.entities.has(entityId)) return;
+    this.pendingRemovals.add(entityId);
+  }
+
+  /**
+   * 予約されている削除を実行する（まとめて安全に削除）
+   */
+  flushRemovals() {
+    for (const entityId of this.pendingRemovals) {
+      this.removeEntity(entityId);
+    }
+    this.pendingRemovals.clear();
+  }
 
   getEntities(componentClasses) {
     const entities = [];
@@ -70,7 +82,11 @@ export class World {
 
   update(dt) {
     for (const system of this.systems) {
+      // system は world を参照できる実装を想定（例: system.world または system.update(world, dt)）
       system.update(dt);
     }
+
+    // ★追加：すべての system の update が終わったら削除を実行
+    this.flushRemovals();
   }
 }

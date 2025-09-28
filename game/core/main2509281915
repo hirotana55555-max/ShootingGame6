@@ -9,7 +9,9 @@ import { RotationSystem } from '../systems/RotationSystem.js';
 import { ShootingSystem } from '../systems/ShootingSystem.js';
 import { LifetimeSystem } from '../systems/LifetimeSystem.js';
 import { DebugSystem } from '../systems/DebugSystem.js';
+import { SpawningSystem } from '../systems/SpawningSystem.js';
 import { createPlayer } from './entityFactory.js';
+import { Generator } from '../components/index.js';
 
 let world;
 let animationFrameId;
@@ -27,10 +29,25 @@ export function startGame(canvas) {
   world.addSystem(new ShootingSystem(world));
   world.addSystem(new MovementSystem(world));
   world.addSystem(new RotationSystem(world));
+  world.addSystem(new SpawningSystem(world));
   world.addSystem(new RenderSystem(world));
   world.addSystem(new DebugSystem(world));
 
   createPlayer(world);
+
+  // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+  // ★ ゲーム開始時に、隕石を生成するためのジェネレータを1つ作成する ★
+  // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+  const meteorGenerator = world.createEntity();
+  world.addComponent(meteorGenerator, new Generator({
+    entityType: 'meteor',
+    trigger: {
+      interval: 2.0, // 2秒ごとに
+      initialDelay: 1.0 // 最初の1秒後から
+    }
+  }));
+  // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
 
   // --- gameLoopの修正 ---
   let lastTime = 0;

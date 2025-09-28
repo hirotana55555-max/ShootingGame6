@@ -4,9 +4,9 @@ export class World {
     this.components = new Map();
     this.systems = [];
     this.nextEntityId = 0;
-
-    // ★追加：削除予約を格納するセット（初期化）
     this.pendingRemovals = new Set();
+
+    this.eventQueue = [];
   }
 
   createEntity() {
@@ -24,34 +24,41 @@ export class World {
   }
 
   removeEntity(entityId) {
-    // 注意: これは「即時削除」をする関数。
-    // 基本は markForRemoval を使って「あとでまとめて削除」する方が安全です。
     this.entities.delete(entityId);
     for (const componentMap of this.components.values()) {
       componentMap.delete(entityId);
     }
   }
 
-  // ←★★★ この位置に追加（removeEntity の直後が読みやすい） ★★★
-  /**
-   * 削除を予約する（すぐには消さない）
-   * system の中からは基本これを呼ぶ
-   * @param {number} entityId
-   */
   markForRemoval(entityId) {
     if (!this.entities.has(entityId)) return;
     this.pendingRemovals.add(entityId);
   }
 
-  /**
-   * 予約されている削除を実行する（まとめて安全に削除）
-   */
   flushRemovals() {
     for (const entityId of this.pendingRemovals) {
       this.removeEntity(entityId);
     }
     this.pendingRemovals.clear();
   }
+
+  // ★ イベントキューを操作するメソッドを2つ追加します
+  /**
+   * イベントをキューに追加する
+   * @param {object} event - イベントオブジェクト (例: { type: 'collision', a: entityA, b: entityB })
+   */
+  emitEvent(event) {
+    this.eventQueue.push(event);
+  }
+
+  /**
+   * 現在のフレームのイベントをすべて取得する
+   * @returns {Array<object>}
+   */
+  getEvents() {
+    return this.eventQueue;
+  }
+  // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
   getEntities(componentClasses) {
     const entities = [];
@@ -82,11 +89,13 @@ export class World {
 
   update(dt) {
     for (const system of this.systems) {
-      // system は world を参照できる実装を想定（例: system.world または system.update(world, dt)）
       system.update(dt);
     }
 
-    // ★追加：すべての system の update が終わったら削除を実行
     this.flushRemovals();
+
+    // ★ 最後にイベントキューを空にする
+    // ★ これにより、イベントは1フレームの間だけ有効になります
+    this.eventQueue = [];
   }
 }

@@ -8,8 +8,11 @@ import { MovementSystem } from '../systems/MovementSystem.js';
 import { RotationSystem } from '../systems/RotationSystem.js';
 import { ShootingSystem } from '../systems/ShootingSystem.js';
 import { LifetimeSystem } from '../systems/LifetimeSystem.js';
+import { DamageSystem } from '../systems/DamageSystem.js';
+import { DeathSystem } from '../systems/DeathSystem.js';
 import { DebugSystem } from '../systems/DebugSystem.js';
 import { SpawningSystem } from '../systems/SpawningSystem.js';
+import { CollisionSystem } from '../systems/CollisionSystem.js';
 import { createPlayer } from './entityFactory.js';
 import { Generator } from '../components/index.js';
 
@@ -29,6 +32,9 @@ export function startGame(canvas) {
   world.addSystem(new ShootingSystem(world));
   world.addSystem(new MovementSystem(world));
   world.addSystem(new RotationSystem(world));
+  world.addSystem(new CollisionSystem(world)); 
+  world.addSystem(new DamageSystem(world));
+  world.addSystem(new DeathSystem(world));
   world.addSystem(new SpawningSystem(world));
   world.addSystem(new RenderSystem(world));
   world.addSystem(new DebugSystem(world));
