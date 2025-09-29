@@ -1,4 +1,4 @@
-//出現（敵、第一号は隕石） 
+//出現（敵、第一号は隕石）
 
 import { Generator } from '../components/index.js';
 import { createMeteor } from '../core/entityFactory.js';

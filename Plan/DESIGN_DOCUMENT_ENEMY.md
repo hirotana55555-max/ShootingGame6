@@ -17,117 +17,74 @@
 
 *   **`Health`**: `(current, max)`
     *   役割: エンティティの耐久値を管理する。
-    *   用途: 敵、破壊可能な障害物、プレイヤーなど。
-
-*   **`Collidable`**: 
-    *   **現状の実装**: `(group, radius)`
-        *   役割: **円形**の当たり判定を持つことを示す。
-        *   `group`: 'enemy', 'player_bullet', 'player' など。衝突判定のグループ分けに使用。
-        *   `radius`: 当たり判定の半径。
-    *   **将来の拡張予定**: `(shape, size, group)`
-        *   `shape`: 'circle', 'rectangle' など。
-        *   `size`: `{ radius: 10 }`, `{ width: 20, height: 30 }` など。
-        *   ※ 現在は円形のみ対応。矩形などは今後の実装課題。
+*   **`Collidable`**: `(group, radius)`
+    *   役割: 円形の当たり判定を持つことを示す。
 
 ### 2.2. AIと振る舞い
 
 *   **`AIState`**: `(currentState, states)`
     *   役割: エンティティの現在の振る舞い（AIの状態）を定義する。
-    *   `currentState`: 'approaching', 'attacking', 'fleeing' など、現在の状態を示すキー。
-    *   `states`: 状態ごとの具体的な振る舞いを定義したオブジェクト。
-        *   **例:**
-            ```json
-            {
-              "approaching": { "movement": "move_towards_player", "shooting": "none" },
-              "attacking": { "movement": "circle_player", "shooting": "fire_main_gun" },
-              "damaged": { "movement": "drift_uncontrolled", "shooting": "none" }
-            }
-            ```
 
 ### 2.3. 階層構造
 
 *   **`Parent`**: `(entityId, offset)`
-    *   役割: 親エンティティのIDを保持する。自身の座標は親からの相対位置となる。
-    *   `offset`: `{ x: 0, y: -50 }` のように、親の中心からの相対座標。
-
+    *   役割: 親エンティティのIDを保持する。
 *   **`Children`**: `(entityIds = [])`
-    *   役割: 子エンティティのIDリストを保持する。親の破壊などに連動させるために使用。
+    *   役割: 子エンティティのIDリストを保持する。
 
 ### 2.4. イベントアクション
 
 *   **`OnDeath`**: `(actions = [])`
     *   役割: `Health`が0になった際に実行されるアクションを定義する。
-    *   **アクションの例:**
-        *   分裂: `{ "type": "SPAWN", "entityType": "small_meteor", "count": 3 }`
-        *   状態変化: `{ "type": "CHANGE_AI_STATE", "target": "SELF", "newState": "berserk" }`
-        *   アイテムドロップ: `{ "type": "DROP_ITEM", "itemType": "power_up" }`
-
 *   **`OnCollision`**: `(actions = [])`
     *   役割: 他のエンティティと衝突した際に実行されるアクションを定義する。
-    *   **アクションの例:**
-        *   ダメージを与える: `{ "type": "DEAL_DAMAGE", "amount": 10 }`
-        *   エフェクトを生成: `{ "type": "SPAWN_EFFECT", "effectType": "spark_small", "position": "CONTACT_POINT" }`
-        *   跳ね返る: `{ "type": "BOUNCE", "restitution": 0.8 }`
-        *   消滅する: `{ "type": "DESTROY_SELF" }`
 
 ### 2.5. 出現ロジック
 
 *   **`Generator`**: `(config)`
     *   役割: 新しいエンティティを動的に生成する「スポナー」の定義。
-    *   **configの例:**
-        *   `entityType`: 'zako_fighter'
-        *   `trigger`: `{ "type": "TIMER", "interval": 5.0 }`
-        *   `spawnPosition`: `{ "type": "RANDOM_TOP" }`
-        *   `limit`: `{ "total": 10, "concurrent": 5 }`
 
 ### 2.6. 材質とエフェクト
 
 *   **`Material`**: `(type)`
-    *   役割: エンティティの「材質」を定義する。
-    *   `type`: 'flesh' (生身), 'steel' (鋼鉄), 'rock' (岩), 'energy' (エネルギー体) など。
+    *   役割: エンティティの「材質」を定義する。（例: 'steel', 'rock'）
 
 ## 3. 新規・更新システム定義
 
 *   **`AISystem` (新規):**
-    *   責務: `AIState`を持つエンティティを監視する。現在の状態（例: 'approaching'）に応じた振る舞い（例: `movement: "move_towards_player"`）を、他のコンポーネント（例: `Velocity`）に反映させる。例えば、`move_towards_player`というロジックに基づき、`Velocity`コンポーネントの値を毎フレーム計算・更新する。
+    *   責務: `AIState`を持つエンティティを監視する。現在の状態に応じた振る舞いを、他のコンポーネント（例: `Velocity`）に反映させる。`DAMAGE_TAKEN`イベントを購読し、AIの状態を`'damaged'`などに遷移させる。
 
 *   **`SpawningSystem`**:
-    *   責務: `Generator`を持つエンティティを監視し、条件に応じて新しいエンティティを生成する。
+    *   責務: `Generator`を持つエンティティを監視し、条件に応じて`entityFactory`経由で新しいエンティティを生成する。`SPAWN_ENTITY`イベントを購読し、動的なエンティティ生成にも対応する。
 
 *   **`CollisionSystem`**:
-    *   責務: `Collidable`を持つエンティティ同士の衝突を検知し、**「衝突イベント」**を生成する。
+    *   責務: `Collidable`を持つエンティティ同士の衝突を**検知**し、`COLLISION`イベントを**発行する**ことに専念する。衝突後の結果については一切関知しない。
 
-*   **`ActionSystem` (新規/責務統合):**
-    *   責務: `OnCollision`や`OnDeath`などによって生成されたアクションイベント（`DEAL_DAMAGE`, `CHANGE_AI_STATE`など）を解釈し、実行する。
-    *   `DEAL_DAMAGE` -> 対象の`Health`を減らす。
-    *   `CHANGE_AI_STATE` -> 対象の`AIState.currentState`を書き換える。
-    *   `SPAWN_EFFECT` -> エフェクト生成の指示を出す。
+*   **`DamageSystem` (新規):**
+    *   責務: `COLLISION`イベントを購読する。イベント内容を解釈し、対象エンティティの`Health`コンポーネントを書き換えることでダメージ処理を実行する。
 
-*   **`EffectSystem`**:
-    *   責務: `SPAWN_EFFECT`アクションを受け、指定されたパーティクルやアニメーションを生成する。エフェクト自体も一時的なエンティティとして扱う。
+*   **`EffectSystem` (新規):**
+    *   責務: `COLLISION`や`DEATH`といったイベントを購読する。エンティティの`Material`コンポーネントなどに応じて、適切なエフェクト（火花、爆発など）を生成するための`SPAWN_EFFECT`イベントを発行する。
 
 *   **`DeathSystem`**:
-    *   責務: `Health`が0以下になったエンティティを探し、そのエンティティの`OnDeath`アクションを実行するためのイベントを生成する。
+    *   責務: `Health`が0以下になったエンティティを探し、`DEATH`イベントを発行する。エンティティの`OnDeath`コンポーネントに定義されたアクション（分裂、アイテムドロップなど）を実行するための、さらなるイベント（`SPAWN_ENTITY`など）を発行することもある。
 
-*   **`HierarchySystem`**:
+*   **`HierarchySystem` (新規):**
     *   責務: `Parent`を持つエンティティの`Position`を、親エンティティの`Position`に基づいて更新する。
 
 ## 4. 処理フローの例
 
 ### 例1：弾が敵に当たり、敵がダメージ状態に移行する
 
-1.  **`CollisionSystem`**が「弾」と「敵」の衝突を検知。
-2.  **`ActionSystem`**が弾の`OnCollision`（`DEAL_DAMAGE`）を処理し、敵の`Health`を減らす。
-3.  **`ActionSystem`**が敵の`OnCollision`（`SPAWN_EFFECT`）を処理。
-4.  **`EffectSystem`**が敵の`Material`に応じた火花エフェクトを生成。
-5.  敵の`Health`が一定値を下回ったことを検知した別のシステム（または`ActionSystem`自身）が、`CHANGE_AI_STATE`アクションを実行。
-6.  **`ActionSystem`**がこれを処理し、敵の`AIState.currentState`を `'attacking'` から `'damaged'` に変更する。
-7.  次のフレームから、**`AISystem`**は敵の`AIState`が`'damaged'`であると認識し、その振る舞い（例: `movement: "drift_uncontrolled"`）を`Velocity`コンポーネントに適用する。結果、敵は制御を失ったように漂い始める。
+1.  **`CollisionSystem`**が「弾」と「敵」の衝突を検知し、`{ type: 'COLLISION', entities: [bulletId, enemyId] }` というイベントを発行する。
+2.  **`DamageSystem`**が`COLLISION`イベントを購読しており、これに反応。弾と敵のペアであることを確認し、敵の`Health`を減らす。
+3.  **`EffectSystem`**も`COLLISION`イベントを購読しており、これに反応。敵の`Material`に応じた火花エフェクトを生成する。
+4.  **`AISystem`**も`COLLISION`イベントを購読しており、ダメージを受けたことを検知。敵の`AIState.currentState`を `'attacking'` から `'damaged'` に変更する。
+5.  次のフレームから、**`AISystem`**は敵の`AIState`が`'damaged'`であると認識し、その振る舞い（例: `movement: "drift_uncontrolled"`）を`Velocity`コンポーネントに適用する。結果、敵は制御を失ったように漂い始める。
 
 ### 例2：隕石が破壊され、分裂する
 
-1.  弾が隕石に当たり、`Health`が0になる。
-2.  **`DeathSystem`**がこれを検知し、隕石の`OnDeath`アクション（`{ type: 'SPAWN', entityType: 'small_meteor', count: 3 }`）を取得し、イベントを生成。
-3.  **`ActionSystem`**がこのイベントを処理し、`SpawningSystem`（または`entityFactory`）に指示を出す。
-4.  3つの小さな隕石エンティティが生成される。
-5.  元の隕石エンティティはワールドから削除される。
+1.  弾が隕石に当たり、`DamageSystem`によって`Health`が0になる。
+2.  **`DeathSystem`**が`Health`が0以下の隕石を検知し、`{ type: 'DEATH', entityId: meteorId }` というイベントを発行する。同時に、元の隕石エンティティを削除予約する (`world.markForRemoval`)。
+3.  **`DeathSystem`**はさらに、隕石が`OnDeath`コンポーネント（分裂アクションを持つ）を持っていることを確認し、`{ type: 'SPAWN_ENTITY', blueprint: 'small_meteor', count: 3 }` のようなイベントを発行する。
+4.  **`SpawningSystem`**が`SPAWN_ENTITY`イベントを購読しており、これに反応。`entityFactory`を使い、3つの小さな隕石エンティティを生成する。

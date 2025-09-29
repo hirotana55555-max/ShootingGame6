@@ -12,7 +12,7 @@ import {
 } from '../components/index.js';
 
 /**
- * プレイヤーエンティティを作成して返す 
+ * プレイヤーエンティティを作成し返す 
  */
 export function createPlayer(world) {
   const canvas = world.canvas;

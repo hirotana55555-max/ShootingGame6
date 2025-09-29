@@ -20,7 +20,7 @@ export class CollisionSystem {
         const positionB = this.world.getComponent(entityB, Position);
 
         // --- 設計ルール適用: 存在確認 ---
-        // このループ内ではエンティティの存在は保証されているが、念のため
+        // このループ内ではエンティティの存在は保証されているが念のため
         if (!collidableA || !positionA || !collidableB || !positionB) {
           continue;
         }

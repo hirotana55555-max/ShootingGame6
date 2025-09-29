@@ -31,84 +31,9 @@
 
 ## 2. 解決策：ブループリント方式への移行
 
-エンティティの定義（どのコンポーネントを、どのような初期値で組み合わせるか）を、JavaScriptの関数ではなく、外部のデータファイル（例: JSON）に「ブループリント」として記述する方式に移行する。
+エンティティの定義（どのコンポーネントを、どのような初期値で組み合わせるか）を、JavaScriptの関数ではなく、外部のデータファイルに「ブループリント」として記述する方式に移行する。
 
 `entityFactory.js`は、特定のブループリントを読み込み、エンティティを組み立てるだけの汎用的な「組み立て係」としての役割に徹する。
-
-### 2.1. ディレクトリ構造の変更
-
-新たに`game/blueprints/`ディレクトリを作成し、エンティティの設計図を格納する。
-
-```
-/game
-  /blueprints
-    - player.json
-    - bullet.json
-    - meteor.json
-    - fighter.json
-  ...
-```
-
-### 2.2. ブループリントファイルの例 (`meteor.json`)
-
-ブループリントのパラメータは、コンストラクタに渡すオブジェクトそのものとして定義する。
-
-```json
-{
-  "name": "Meteor",
-  "components": {
-    "Position": { "x": 0, "y": 0 },
-    "Velocity": { "vx": 0, "vy": 1.5 },
-    "Renderable": { "color": "gray", "width": 20, "height": 20, "shape": "rectangle" },
-    "Team": { "id": "enemy" },
-    "Health": { "value": 3 },
-    "Collidable": { "group": "enemy", "radius": 20 }
-  }
-}
-```
-
-### 2.3. `entityFactory.js`の将来像
-
-個別の`create`関数を廃止し、代わりに`createEntityFromBlueprint`という単一の汎用関数を実装する。
-
-```javascript
-import * as Components from '../components/index.js';
-// ブループリントの動的インポートについては別途検討
-import meteorBlueprint from '../blueprints/meteor.json';
-
-const blueprints = {
-  meteor: meteorBlueprint,
-};
-
-/**
- * ブループリント名に基づいてエンティティを生成する汎用関数
- * @param {World} world
- * @param {string} blueprintName - 'meteor' や 'fighter' など
- * @param {object} overrides - 初期位置など、ブループリントの値を上書きする設定
- */
-export function createEntityFromBlueprint(world, blueprintName, overrides = {}) {
-  const blueprint = blueprints[blueprintName];
-  if (!blueprint) throw new Error(`ブループリント'${blueprintName}'が見つかりません。`);
-
-  const entity = world.createEntity();
-
-  // ブループリントのデフォルト値と、呼び出し元の指定(overrides)をマージする
-  const finalComponents = { ...blueprint.components };
-  for (const componentName in overrides) {
-    finalComponents[componentName] = {
-      ...finalComponents[componentName],
-      ...overrides[componentName]
-    };
-  }
-
-  for (const componentName in finalComponents) {
-    const params = finalComponents[componentName];
-    world.addComponent(entity, new Components[componentName](params));
-  }
-
-  return entity;
-}
-```
 
 ## 3. 実行計画
 
@@ -117,28 +42,43 @@ export function createEntityFromBlueprint(world, blueprintName, overrides = {}) 
 ### フェーズ1：基礎工事（完了）
 
 -   [x] **【済】全コンポーネントの`constructor`をオブジェクト引数形式に統一する。**
-    -   `constructor(x, y)` を `constructor({ x, y })` に変更。
-    -   これにより、引数の順序の問題が根本的に解決された。
 -   [x] **【済】`entityFactory`等の関数呼び出しをオブジェクト引数形式に統一する。**
-    -   `createBullet(world, pos, rot)` を `createBullet(world, { ownerPosition, ownerRotation })` に変更。
-    -   これにより、関数呼び出しの可読性と安全性が向上した。
 
-### フェーズ2：ブループリント方式への移行（次ステップ）
+### フェーズ2：イベント駆動化（完了）
 
-*   **トリガー:** 敵エンティティの種類が2種類以上に増える、または親子関係のような複雑なエンティティ（例：砲台を持つ戦艦）の設計が必要になった時点。
+-   [x] **【済】システム間の密結合を解消するため、イベント駆動アーキテクチャを導入する。**
+    -   `World`にイベント発行/購読（Pub/Sub）機能 (`publish`/`subscribe`/`processEvents`) を実装。
+    -   `CollisionSystem`は衝突検知と`COLLISION`イベントの発行に専念。
+    -   `DamageSystem`を新設し、`COLLISION`イベントを購読してダメージ処理を行うように分離。
+    -   これにより、各システムは他のシステムの存在を意識することなく、関心のあるイベントにのみ反応する「関心の分離」が実現された。
+
+### フェーズ3：ブループリント方式への移行（完了）
+
+-   [x] **【済】`entityFactory`の神ファイル化を防ぐため、データ駆動設計（ブループリント方式）を導入する。**
+    -   `game/blueprints`ディレクトリを新設。
+    -   ブループリントの形式として、動的な値も扱える「JavaScriptモジュール形式」を採用。
+    -   読み込み方式は、ゲームループの同期性を保つため、動的インポートではなく「事前登録（`blueprints/index.js`）」方式を採用。
+    -   `entityFactory`に汎用的な`createEntityFromBlueprint`関数を実装。
+    -   `SpawningSystem`が`createEntityFromBlueprint`を呼び出すように修正し、`meteor`のブループリント化を完了。
+
+### フェーズ4：堅牢化（次ステップ）
+
+*   **トリガー:** 「一瞬のエラー表示」という潜在的バグが観測されたため、即時着手する。
+*   **目的:** イベント処理の過程で、すでに削除されたエンティティにアクセスしようとして発生するエラーを根絶する。
 *   **移行手順:**
-    1.  `game/blueprints/` ディレクトリを作成する。
-    2.  `createEntityFromBlueprint`関数を上記2.3の通りに実装する。
-    3.  まず`meteor`（隕石）からブループリント化を試す。`meteor.json`を作成し、`SpawningSystem`が`createMeteor`の代わりに`createEntityFromBlueprint('meteor', ...)`を呼び出すように修正する。
-    4.  動作確認後、他のエンティティ（`player`, `bullet`など）も順次ブループリント化していく。
-    5.  最終的に、`entityFactory.js`から個別の`create`関数を削除し、`createEntityFromBlueprint`に一本化する。
+    1.  イベントを処理するすべてのシステム（現状では`DamageSystem`など）のイベントハンドラに、処理対象エンティティの**「生存確認」**を行うガード節 (`if (!world.entities.has(entityId)) return;`) を追加する。
+    2.  これを設計ルールとし、将来作成するすべてのイベント購読システムに適用を義務付ける。
 
-### フェーズ3：将来的な課題
+### フェーズ5：将来的な課題
+*   **プレイヤーと弾のブループリント化:** `entityFactory`から古い`createPlayer`/`createBullet`関数を削除し、完全にブループリント駆動に移行する。
+*   **親子関係の実装:** 砲台を持つ戦艦のようなエンティティを表現するため、`Parent`/`Children`コンポーネントと`HierarchySystem`の導入を検討する。
 
-*   **親子関係の実装:** 砲台を持つ戦艦のようなエンティティを表現するため、`Parent`コンポーネントや`Children`コンポーネント、およびそれらを処理する`HierarchySystem`の導入を検討する。
-*   **ブループリントの動的ロード:** エンティティの種類が増えた際、すべてのブループリントを事前に`import`するのは非効率。必要なブループリントを動的に読み込む仕組みを検討する。
 
-```
+
+
+
+
+
 
 素晴らしい。提供いただいた **`REFACTORING_PLAN.md`** は、**非常に成熟したソフトウェア設計思想**と、**AIとの協働における現実的なワークフロー理解**に基づいており、現時点でのプロジェクト状況に極めて適切です。
 

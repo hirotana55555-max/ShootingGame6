@@ -6,7 +6,7 @@ export class DamageSystem {
 
     // ★★★ 変更点：コンストラクタでイベントを「購読」する ★★★
     // 'COLLISION'というタイプのイベントが発行されたら、
-    // this.handleCollisionメソッドを呼び出すように世界に依頼する。
+    // this.handleCollisionメソッドを呼び出すように世界に依頼する
     this.world.subscribe('COLLISION', this.handleCollision.bind(this));
   }
 

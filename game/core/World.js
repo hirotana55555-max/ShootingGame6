@@ -6,7 +6,7 @@ export class World {
     this.nextEntityId = 0;
     this.pendingRemovals = new Set();
 
-    // --- イベントシステム関連のプロパティ ---
+    // --- イベントシステム関連プロパティ ---
     this.eventQueue = [];
     this.eventListeners = new Map(); // イベントタイプ => リスナー(関数)の配列
   }
