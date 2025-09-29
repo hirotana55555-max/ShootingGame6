@@ -25,6 +25,12 @@
 - **ルール:**
     - システムは、自身の専門外の知識を持ってはならない。
     - システム間のデータのやり取りは、コンポーネントを介して行う。
+    - **イベント駆動の原則**:
+        - システム間の通信は、`World` を介した**イベントパブリッシュ/サブスクライブ**によって行う。各システムは、自身の関心のあるイベントのみを購読し、**他のシステムの存在を意識しない**。これにより、関心の分離をイベント層でも維持する。
+        - **イベントハンドラは、処理対象エンティティの生存を保証されない。** イベントを処理する前に、必ずエンティティの存在確認を行うこと。
+        - **イベントオブジェクトは、エンティティIDと事実（イベントタイプ等）のみを含むこと。** 参照やコンポーネント等のデータを含めず、間接的な結合を避けること。
+
+
 
 ### 3.2. 描画システムの段階的進化（重要）
 
@@ -86,6 +92,10 @@
 ❯ npx tree-node-cli -I "node_modules"
 
 ShootingGame6
+├── Plan
+│   ├── DESIGN_DOCUMENT.md
+│   ├── DESIGN_DOCUMENT_ENEMY.md
+│   └── REFACTORING_PLAN.md
 ├── README.md
 ├── app
 │   ├── favicon.ico
@@ -95,9 +105,6 @@ ShootingGame6
 ├── components
 │   └── GameCanvas.tsx
 ├── game
-│   ├── DESIGN_DOCUMENT.md
-│   ├── DESIGN_DOCUMENT_ENEMY.md
-│   ├── REFACTORING_PLAN.md
 │   ├── components
 │   │   ├── Bullet.js
 │   │   ├── Collidable.js
@@ -115,13 +122,14 @@ ShootingGame6
 │   ├── core
 │   │   ├── System.js
 │   │   ├── World.js
-│   │   ├── World2509281951
+│   │   ├── World2509291620
 │   │   ├── entityFactory.js
-│   │   ├── main.js
-│   │   └── main2509281915
+│   │   └── main.js
 │   ├── systems
 │   │   ├── CollisionSystem.js
+│   │   ├── CollisionSystem2509291623
 │   │   ├── DamageSystem.js
+│   │   ├── DamageSystem2509291622
 │   │   ├── DeathSystem.js
 │   │   ├── DebugSystem.js
 │   │   ├── InputSystem.js
@@ -144,4 +152,4 @@ ShootingGame6
 ├── tailwind.config.ts
 └── tsconfig.json
 ---
-*最終更新日: 2025年9月29日00:01*
+*最終更新日: 2025年9月29日16:18*

@@ -1,3 +1,4 @@
+//CollisionSystem.js 
 import { Collidable, Position } from '../components/index.js';
 
 export class CollisionSystem {
@@ -19,12 +20,6 @@ export class CollisionSystem {
         const collidableB = this.world.getComponent(entityB, Collidable);
         const positionB = this.world.getComponent(entityB, Position);
 
-        // --- 設計ルール適用: 存在確認 ---
-        // このループ内ではエンティティの存在は保証されているが、念のため
-        if (!collidableA || !positionA || !collidableB || !positionB) {
-          continue;
-        }
-
         if (collidableA.group === collidableB.group) {
           continue;
         }
@@ -37,12 +32,13 @@ export class CollisionSystem {
         const radiusSumSq = radiusSum * radiusSum;
 
         if (distanceSq < radiusSumSq) {
-          // ★★★ 変更点：'emitEvent' から 'publish' へ ★★★
-          // イベントタイプを大文字に統一（慣習）
-          this.world.publish({
-            type: 'COLLISION',
-            entities: [entityA, entityB], // 設計ルール適用: IDのみを配列で渡す
-            groups: [collidableA.group, collidableB.group]
+          // ★ 衝突イベントを発行する
+          this.world.emitEvent({
+            type: 'collision',
+            entityA: entityA,
+            entityB: entityB,
+            groupA: collidableA.group,
+            groupB: collidableB.group
           });
         }
       }

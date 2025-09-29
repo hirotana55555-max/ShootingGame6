@@ -1,3 +1,4 @@
+//World.js
 export class World {
   constructor() {
     this.entities = new Set();
@@ -6,12 +7,9 @@ export class World {
     this.nextEntityId = 0;
     this.pendingRemovals = new Set();
 
-    // --- イベントシステム関連のプロパティ ---
     this.eventQueue = [];
-    this.eventListeners = new Map(); // イベントタイプ => リスナー(関数)の配列
   }
 
-  // --- エンティティ・コンポーネント管理 (変更なし) ---
   createEntity() {
     const entityId = this.nextEntityId++;
     this.entities.add(entityId);
@@ -45,6 +43,24 @@ export class World {
     this.pendingRemovals.clear();
   }
 
+  // ★ イベントキューを操作するメソッドを2つ追加します
+  /**
+   * イベントをキューに追加する
+   * @param {object} event - イベントオブジェクト (例: { type: 'collision', a: entityA, b: entityB })
+   */
+  emitEvent(event) {
+    this.eventQueue.push(event);
+  }
+
+  /**
+   * 現在のフレームのイベントをすべて取得する
+   * @returns {Array<object>}
+   */
+  getEvents() {
+    return this.eventQueue;
+  }
+  // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
   getEntities(componentClasses) {
     const entities = [];
     for (const entityId of this.entities) {
@@ -72,57 +88,15 @@ export class World {
     this.systems.push(system);
   }
 
-  // --- ★★★ ここからが新しいイベントシステム ★★★ ---
-
-  /**
-   * 指定したイベントタイプに関心のあるリスナー（関数）を登録する
-   * @param {string} eventType - イベントのタイプ (例: 'COLLISION')
-   * @param {Function} listener - イベント発生時に呼び出されるコールバック関数
-   */
-  subscribe(eventType, listener) {
-    if (!this.eventListeners.has(eventType)) {
-      this.eventListeners.set(eventType, []);
-    }
-    this.eventListeners.get(eventType).push(listener);
-  }
-
-  /**
-   * イベントを発行（キューに追加）する
-   * @param {object} event - イベントオブジェクト (例: { type: 'COLLISION', ... })
-   */
-  publish(event) {
-    this.eventQueue.push(event);
-  }
-
-  /**
-   * キューに溜まったすべてのイベントを処理し、購読者にディスパッチする
-   * このメソッドは、通常フレームの最後に一度だけ呼び出される
-   */
-  processEvents() {
-    while (this.eventQueue.length > 0) {
-      const event = this.eventQueue.shift(); // 先頭からイベントを取り出す
-      const listeners = this.eventListeners.get(event.type);
-
-      if (listeners) {
-        for (const listener of listeners) {
-          listener(event); // 登録されたリスナーをすべて実行
-        }
-      }
-    }
-  }
-
-  // --- ★★★ ゲームループの更新処理 ★★★ ---
-
   update(dt) {
-    // 1. 各システムのロジックを更新
     for (const system of this.systems) {
       system.update(dt);
     }
 
-    // 2. 削除予定のエンティティをクリーンアップ
     this.flushRemovals();
 
-    // 3. このフレームで発行されたすべてのイベントを処理
-    this.processEvents();
+    // ★ 最後にイベントキューを空にする
+    // ★ これにより、イベントは1フレームの間だけ有効になります
+    this.eventQueue = [];
   }
 }

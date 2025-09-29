@@ -1,50 +1,58 @@
-import { Health, Bullet } from '../components/index.js';
+import { Health } from '../components/index.js';
 
 export class DamageSystem {
   constructor(world) {
     this.world = world;
+
+    // ★★★ 変更点：コンストラクタでイベントを「購読」する ★★★
+    // 'COLLISION'というタイプのイベントが発行されたら、
+    // this.handleCollisionメソッドを呼び出すように世界に依頼する。
+    this.world.subscribe('COLLISION', this.handleCollision.bind(this));
   }
 
-  update(dt) {
-    // 1. 今フレームに発行されたイベントをすべて取得 
-    const events = this.world.getEvents();
+  // ★★★ 変更点：イベント処理を独立したメソッドに切り出す ★★★
+  handleCollision(event) {
+    // 1. イベントからエンティティIDとグループ情報を取得
+    const [entityA, entityB] = event.entities;
+    const [groupA, groupB] = event.groups;
 
-    // 2. 'collision' イベントだけを抜き出して処理する
-    for (const event of events) {
-      if (event.type !== 'collision') {
-        continue;
-      }
-
-      // 3. 衝突したペアの情報を整理する
-      const { entityA, entityB, groupA, groupB } = event;
-
-      // 4. 衝突ペアのどちらが「弾」でどちらが「敵」かを判定する
-      let bulletEntity, enemyEntity;
-
-      if (groupA === 'player_bullet' && groupB === 'enemy') {
-        bulletEntity = entityA;
-        enemyEntity = entityB;
-      } else if (groupB === 'player_bullet' && groupA === 'enemy') {
-        bulletEntity = entityB;
-        enemyEntity = entityA;
-      } else {
-        // プレイヤーの弾と敵以外の衝突は無視
-        continue;
-      }
-
-      // 5. 敵のHealthコンポーネントを取得
-      const enemyHealth = this.world.getComponent(enemyEntity, Health);
-      if (!enemyHealth) {
-        // 敵にHealthがなければ何もしない
-        continue;
-      }
-
-      // 6. ダメージを与える！ (今回は弾のダメージを1と仮定)
-      enemyHealth.current -= 1;
-      console.log(`ダメージ！ 敵(${enemyEntity})の残りHP: ${enemyHealth.current}`);
-
-      // 7. 役目を終えた弾を消す (削除予約する)
-      this.world.markForRemoval(bulletEntity);
+    // --- 設計ルール適用: 存在確認 ---
+    // イベントを処理する時点で、エンティティはもう存在しない可能性がある
+    if (!this.world.entities.has(entityA) || !this.world.entities.has(entityB)) {
+      return;
     }
+
+    // 2. 衝突ペアのどちらが「弾」でどちらが「敵」かを判定する
+    let bulletEntity, enemyEntity;
+
+    if (groupA === 'player_bullet' && groupB === 'enemy') {
+      bulletEntity = entityA;
+      enemyEntity = entityB;
+    } else if (groupB === 'player_bullet' && groupA === 'enemy') {
+      bulletEntity = entityB;
+      enemyEntity = entityA;
+    } else {
+      // このシステムが関心を持つペアでなければ、何もしない
+      return;
+    }
+
+    // 3. 敵のHealthコンポーネントを取得
+    const enemyHealth = this.world.getComponent(enemyEntity, Health);
+    if (!enemyHealth) {
+      return;
+    }
+
+    // 4. ダメージを与える！ (今回は弾のダメージを1と仮定)
+    enemyHealth.current -= 1;
+    console.log(`ダメージ！ 敵(${enemyEntity})の残りHP: ${enemyHealth.current}`);
+
+    // 5. 役目を終えた弾を消す (削除予約する)
+    this.world.markForRemoval(bulletEntity);
+  }
+
+  // ★★★ 変更点：updateメソッドは空になる ★★★
+  // このシステムはイベント駆動なので、毎フレーム実行するロジックはない
+  update(dt) {
+    // 何もしない
   }
 }
